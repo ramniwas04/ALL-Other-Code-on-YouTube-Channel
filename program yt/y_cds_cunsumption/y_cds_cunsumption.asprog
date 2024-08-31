@@ -1,0 +1,50 @@
+*&---------------------------------------------------------------------*
+*& Report y_cds_cunsumption
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT y_cds_cunsumption.
+
+
+*cl_salv_gui_table_ida=>create_for_cds_view(
+*  EXPORTING
+*    iv_cds_view_name      = 'ZCDS_SAMPLE_01'
+**    io_gui_container      =
+**    io_calc_field_handler =
+**  RECEIVING
+**    ro_alv_gui_table_ida  =
+*)->fullscreen( )->display( ).
+
+
+CL_DD_DDL_ANNOTATION_SERVICE=>get_annos(
+  EXPORTING
+    entityname         = 'ZCDS_SAMPLE_01'
+*    variant            = ''
+*    language           = SY-LANGU
+*    extend             = abap_false
+*    metadata_extension = abap_true
+*    translation        = abap_true
+*    null_values        = abap_false
+  IMPORTING
+    entity_annos       = data(ls_annos)
+    element_annos      = data(ls_el_annos)
+*    parameter_annos    =
+*    annos_tstmp        =
+).
+*CATCH cx_salv_ida_contract_violation..
+*CATCH cx_salv_db_connection.
+*CATCH cx_salv_db_table_not_supported.
+*CATCH cx_salv_ida_contract_violation.
+*CATCH cx_salv_function_not_supported.
+  cl_demo_output=>Write( ls_annos ).
+
+  cl_demo_output=>display( ls_el_annos ).
+
+*SELECT
+* FROM zcds_sample_01
+* FIELDS *
+*  INTO TABLE @DATA(it_result).
+*IF sy-subrc IS INITIAL.
+*  cl_demo_output=>display( it_result ).
+*
+*ENDIF.

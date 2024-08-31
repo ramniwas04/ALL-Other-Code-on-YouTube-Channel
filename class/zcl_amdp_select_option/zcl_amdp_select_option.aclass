@@ -1,0 +1,55 @@
+CLASS zcl_amdp_select_option DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC .
+  PUBLIC SECTION.
+    INTERFACES if_amdp_marker_hdb.
+
+    TYPES:BEGIN OF ty_out,
+            mandt TYPE mandt,
+            vbeln TYPE vbeln,
+            posnr TYPE posnr,
+            matnr TYPE matnr,
+            kunnr TYPE kunnr,
+            name1 TYPE name1,
+          END OF ty_out,
+          tt_out TYPE TABLE OF ty_out.
+
+    CLASS-METHODS handle_select_option
+      IMPORTING
+        VALUE(iv_mandt) TYPE sy-mandt
+        VALUE(iv_where) TYPE string
+      EXPORTING
+        VALUE(et_out)   TYPE tt_out.
+
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+ENDCLASS.
+CLASS zcl_amdp_select_option IMPLEMENTATION.
+
+  METHOD handle_select_option BY DATABASE PROCEDURE FOR HDB
+                              LANGUAGE SQLSCRIPT
+                              USING vbak vbap kna1 .
+
+    et_out  =  select so.mandt,
+                      so.vbeln,
+                      item.posnr,
+                      item.matnr,
+                      so.kunnr,
+                      kna1.name1
+                from vbak as so
+                 INNER JOIN vbap as item
+                  on so.mandt =  item.mandt
+                  and so.vbeln = item.vbeln
+                 LEFT OUTER JOIN  kna1
+                   on so.mandt =  kna1.mandt
+                   and so.kunnr = kna1.kunnr
+                WHERE  so.mandt = :iv_mandt   ;
+
+   et_out = apply_filter( :et_out, :iv_where );
+
+
+
+  ENDMETHOD.
+
+ENDCLASS.

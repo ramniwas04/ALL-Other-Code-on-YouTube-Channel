@@ -1,0 +1,23 @@
+CLASS zcl_fallback_so_info DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+
+    INTERFACES if_badi_interface .
+    INTERFACES zif_sales_order_info .
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+ENDCLASS.
+
+
+
+CLASS zcl_fallback_so_info IMPLEMENTATION.
+  METHOD zif_sales_order_info~modify_header.
+    LOOP AT it_vbak ASSIGNING FIELD-SYMBOL(<ls_vbak>).
+       <ls_vbak>-zzdate = sy-datum.
+       <ls_vbak>-zzusername = 'Ram'.
+    ENDLOOP.
+  ENDMETHOD.
+ENDCLASS.

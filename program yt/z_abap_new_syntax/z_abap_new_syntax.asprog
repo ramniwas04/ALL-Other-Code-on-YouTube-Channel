@@ -1,0 +1,46 @@
+*&---------------------------------------------------------------------*
+*& Report Z_ABAP_NEW_SYNTAX
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT z_abap_new_syntax.
+
+************************************************************************
+*-------------------------NEW OPEN SQL---------------------------------*
+************************************************************************
+
+*-----------------------------------------------------------------------
+*Example-1: Calculation using CASE Syntax Within SELECT
+*-----------------------------------------------------------------------
+CONSTANTS: lc_purchase_order TYPE char10 VALUE 'PO',
+           lc_sales_order    TYPE char10 VALUE 'SO',
+           lc_others         TYPE char10 VALUE 'OTHERS'.
+
+SELECT vbeln, posnr, matnr, charg, vgbel, vgpos,
+       CASE
+       WHEN vgbel GE '4500000000' THEN @lc_purchase_order
+       WHEN vgbel LT '4500000000' THEN @lc_sales_order
+       ELSE @lc_others
+       END AS reference_type
+       FROM vbap
+       INTO TABLE @DATA(lit_vbap)
+*       ORDER BY reference_type
+       UP TO 100 ROWS
+       WHERE vgbel IS NOT NULL.
+
+
+LOOP AT lit_vbap ASSIGNING FIELD-SYMBOL(<lfs_vbap>).
+ENDLOOP.
+
+*-----------------------------------------------------------------------
+*Example-2: Using a CAST statement in SELECT Query
+*-----------------------------------------------------------------------
+SELECT matnr AS material, meinh AS alt_unit,
+CAST( umrez AS FLTP ) / CAST( umren AS FLTP )
+AS ratio FROM marm WHERE meinh = 'EA'
+INTO TABLE @DATA(lt_marm)
+UP TO 100 ROWS.
+
+"Loop through table for output
+LOOP AT lt_marm ASSIGNING FIELD-SYMBOL(<lfs_marm>).
+ENDLOOP.

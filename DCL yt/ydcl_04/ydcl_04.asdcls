@@ -1,0 +1,10 @@
+@EndUserText.label: 'DCL for 04'
+@MappingRole: true
+define role YDCL_04 {
+    grant
+        select
+            on
+                YDDLS_SAMPLE_04
+                    where
+                        Kunnr = '0017100001';                    
+}

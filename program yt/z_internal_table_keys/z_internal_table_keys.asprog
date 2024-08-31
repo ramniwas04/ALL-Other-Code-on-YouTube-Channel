@@ -1,0 +1,46 @@
+*&---------------------------------------------------------------------*
+*& Report z_internal_table_keys
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT z_internal_table_keys.
+*Internal tables always have a primary key and can have up to 15
+* optional secondary table keys.
+*Standard tables are automatically assigned a standard key
+*if an explicit primary key is not defined.
+*Standard key :- whose key fields in a structured row type are all table fields with
+**character-like data types and byte-like data types.
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.
+
+CLASS demo IMPLEMENTATION.
+
+  METHOD main.
+    TYPES: BEGIN OF helper_type,
+             vbeln TYPE vbak-vbeln,
+             vkorg TYPE vbak-vkorg,
+             vkgrp TYPE vbak-vkgrp,
+             netwr TYPE vbak-netwr,
+             kunnr TYPE vbak-kunnr,
+           END OF helper_type.
+    DATA: lt_vbak TYPE standard TABLE OF helper_type
+           WITH NON-UNIQUE key primary_key  components vbeln.
+   DATA: lt_vbak_sort TYPE standard TABLE OF helper_type
+           WITH non-UNIQUE key vbeln.           
+    SELECT
+     FROM vbak
+     FIELDS vbeln,vkorg,vkgrp,netwr,kunnr
+     INTO TABLE @lt_vbak
+     UP TO 100 ROWS.
+    IF sy-subrc IS INITIAL.
+      cl_demo_output=>display( lt_vbak ).
+    ENDIF.
+  ENDMETHOD.
+
+ENDCLASS.
+
+START-OF-SELECTION.
+  demo=>main( ).

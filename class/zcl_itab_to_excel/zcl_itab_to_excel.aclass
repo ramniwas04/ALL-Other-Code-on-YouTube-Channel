@@ -1,0 +1,190 @@
+CLASS zcl_itab_to_excel DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+    METHODS:
+      itab_to_xstring
+        IMPORTING ir_data_ref       TYPE REF TO data
+        RETURNING VALUE(rv_xstring) TYPE xstring.
+    METHODS: fill_data.
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+ENDCLASS.
+
+
+
+CLASS zcl_itab_to_excel IMPLEMENTATION.
+  METHOD itab_to_xstring.
+
+    DATA: lo_table  TYPE REF TO cl_salv_table,
+          lt_fcat   TYPE lvc_t_fcat,
+          lo_result TYPE REF TO cl_salv_ex_result_data_table.
+
+    FIELD-SYMBOLS: <fs_data> TYPE ANY TABLE.
+
+    CLEAR rv_xstring.
+    ASSIGN ir_data_ref->* TO <fs_data>.
+
+    TRY.
+        cl_salv_table=>factory(
+          IMPORTING r_salv_table = lo_table
+          CHANGING  t_table      = <fs_data> ).
+
+        lt_fcat =
+          cl_salv_controller_metadata=>get_lvc_fieldcatalog(
+            r_columns      = lo_table->get_columns( )
+            r_aggregations = lo_table->get_aggregations( ) ).
+
+        lo_result =
+          cl_salv_ex_util=>factory_result_data_table(
+            r_data         = ir_data_ref
+            t_fieldcatalog = lt_fcat ).
+
+        cl_salv_bs_tt_util=>if_salv_bs_tt_util~transform(
+          EXPORTING
+            xml_type      = if_salv_bs_xml=>c_type_xlsx
+            xml_version   = cl_salv_bs_a_xml_base=>get_version( )
+            r_result_data = lo_result
+            xml_flavour   = if_salv_bs_c_tt=>c_tt_xml_flavour_export
+            gui_type      = if_salv_bs_xml=>c_gui_type_gui
+          IMPORTING
+            xml           = rv_xstring ).
+      CATCH cx_root.
+        CLEAR rv_xstring.
+    ENDTRY.
+  ENDMETHOD.
+  METHOD fill_data.
+    TYPES: BEGIN OF ty_final,
+             id                       TYPE char6,
+             cust                     TYPE kna1-kunnr,
+             name                     TYPE kna1-name1,
+             address                  TYPE kna1-stras,
+             city                     TYPE kna1-ort01,
+             state                    TYPE kna1-regio,
+             zip                      TYPE kna1-pstlz,
+             latitude                 TYPE char10,
+             longitude                TYPE char10,
+             fixedtime                TYPE char3,
+             chain                    TYPE kna1-kunnr,
+             salesman                 TYPE knvv-vkgrp,
+             store_hours              TYPE  char40,
+             delivery_window          TYPE  char40,
+             truck_size_restriction   TYPE  char10,
+             day_restrictions         TYPE  char10,
+             county                   TYPE  char3,
+             rt                       TYPE  char6,
+             seq                      TYPE  char6,
+             points                   TYPE  char10,
+             load                     TYPE  char6,
+             stop                     TYPE  char10,
+             eta                      TYPE  char8,
+             delivery_day             TYPE  char3,
+             order_day                TYPE  char3,
+             distribution_day         TYPE  char3,
+             freq                     TYPE  char2,
+             weight                   TYPE  char10,
+             cube                     TYPE  char10,
+             grandtotal               TYPE  char10,
+             dryrepack                TYPE  char10,
+             frozrepack               TYPE  char10,
+             coolrepack               TYPE  char10,
+             cartoncnt                TYPE  char10,
+             unldgrandtotal           TYPE  char10,
+             unlddryrepack            TYPE  char10,
+             unldfrozrepack           TYPE  char10,
+             unldcoolrepack           TYPE  char10,
+             unldcartoncnt            TYPE  char10,
+             size                     TYPE  char10,
+             open1                    TYPE  char10,
+             close1                   TYPE  char10,
+             pattern1                 TYPE  char10,
+             open2                    TYPE  char10,
+             close2                   TYPE  char10,
+             pattern2                 TYPE  char10,
+             open3                    TYPE  char10,
+             close3                   TYPE  char10,
+             pattern3                 TYPE  char10,
+             open4                    TYPE  char10,
+             close4                   TYPE  char10,
+             pattern4                 TYPE  char10,
+             phone                    TYPE  kna1-telf1,
+             closetw                  TYPE  char10,
+             unldcube                 TYPE  char10,
+             contact                  TYPE  char10,
+             id2                      TYPE  char10,
+             id3                      TYPE  char10,
+             address2                 TYPE  char10,
+             szrestriction            TYPE  char10,
+             eqcode                   TYPE  char10,
+             qty1                     TYPE  char10,
+             grandtotalwocig          TYPE  char10,
+             dryrepakwcig             TYPE  char10,
+             unldqty1                 TYPE  char10,
+             unldweight               TYPE  char10,
+             unldgrandtotalwocig      TYPE  char10,
+             unlddryrepakwcig         TYPE  char10,
+             symbol                   TYPE  char10,
+             color                    TYPE  char10,
+             selected                 TYPE  char10,
+             earliestdate             TYPE  char10,
+             latestdate               TYPE  char10,
+             earlybuffer              TYPE  char10,
+             latebuffer               TYPE  char10,
+             penaltycost              TYPE  char10,
+             addresserr               TYPE  char10,
+             georesult                TYPE  char10,
+             maxsplits                TYPE  char10,
+             creditcode               TYPE  char10,
+             wh                      TYPE  char10,
+             shipmentnumber           TYPE  char10,
+             shipdate                 TYPE  char10,
+             stopold                  TYPE  char10,
+             loadold                  TYPE  char10,
+             zone                     TYPE  char10,
+             amstart                  TYPE  char10,
+             amend                    TYPE  char10,
+             amadj                    TYPE  char10,
+             pmstart                  TYPE  char10,
+             pmend                    TYPE  char10,
+             pmadj                    TYPE  char10,
+             frequency                TYPE  char10,
+             mindaysbetweendeliveries TYPE  char10,
+             maxdaysbetweendeliveries TYPE  char10,
+             priority                 TYPE  char10,
+             onfinalize               TYPE  char10,
+             unldmilk                 TYPE  char10,
+             territory                TYPE  char10,
+             day                      TYPE  char3,
+             servtm                   TYPE  char8,
+             esttime                  TYPE  char8,
+             stemtm                   TYPE  char8,
+             drvbtwnstop              TYPE  char10,
+             lock                     TYPE  char10,
+             orgterritory             TYPE  char10,
+             orgday                   TYPE  char3,
+             change                   TYPE  char10,
+             assigneddays             TYPE  char3,
+             country                  TYPE  char3,
+           END OF ty_final.
+    DATA : it_kna1  TYPE TABLE OF ty_kna1,
+           it_final TYPE TABLE OF ty_final,
+           wa_kna1  TYPE ty_kna1,
+           wa_final TYPE ty_final.
+    DATA: it_zknvv    TYPE TABLE OF ty_zknvv,
+          it_knvv     TYPE TABLE OF ty_knvv,
+          lo_data_ref TYPE any,
+          lv_xstring  TYPE any.
+
+    GET REFERENCE OF it_final INTO lo_data_ref.
+    lv_xstring = NEW zcl_itab_to_excel( )->itab_to_xstring( lo_data_ref ).
+    OPEN DATASET lv_xls_file FOR OUTPUT IN BINARY MODE.
+    IF sy-subrc EQ 0.
+      TRANSFER lv_xstring TO lv_xls_file.
+      CLOSE DATASET.
+    ENDIF.
+
+  ENDMETHOD.
+
+ENDCLASS.

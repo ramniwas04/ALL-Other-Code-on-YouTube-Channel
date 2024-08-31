@@ -1,0 +1,45 @@
+*&---------------------------------------------------------------------*
+*& Report zr_opensql_16_host_expre_where
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zr_opensql_16_host_expre_where.
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS class_constructor.
+    CLASS-METHODS main.
+  PRIVATE SECTION.
+    CLASS-DATA: it_scarr TYPE STANDARD TABLE OF scarr.
+
+ENDCLASS.
+CLASS demo IMPLEMENTATION.
+
+  METHOD class_constructor.
+    SELECT *
+     FROM scarr
+     INTO TABLE @it_scarr.
+
+  ENDMETHOD.
+  METHOD main.
+    DATA : lv_carrame TYPE scarr-carrname VALUE 'American Airlines'.
+    cl_demo_input=>request(
+      CHANGING
+        field       =  lv_carrame
+    ).
+
+    SELECT
+     FROM spfli
+     FIELDS carrid,cityfrom,cityto
+     WHERE carrid = @( VALUE spfli-carrid( it_scarr[ carrname = lv_carrame ]-carrid OPTIONAL ) )
+     INTO TABLE @DATA(it_result)
+     .
+    IF sy-subrc IS INITIAL..
+      cl_demo_output=>display( it_result ).
+    ENDIF.
+
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  demo=>main( ).

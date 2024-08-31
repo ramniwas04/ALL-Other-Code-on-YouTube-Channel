@@ -1,0 +1,66 @@
+*&---------------------------------------------------------------------*
+*& Report z_inline_declaration_program
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT z_inline_declaration_program.
+
+CLASS lcl_main DEFINITION.
+
+  PUBLIC SECTION.
+    TYPES: BEGIN OF ty_helper_type,
+             vbeln TYPE vbak-vbeln,
+             vkorg TYPE vbak-vkorg,
+             vkgrp TYPE vbak-vkgrp,
+           END OF ty_helper_type.
+    CLASS-METHODS: main
+      EXPORTING
+        ls_vbak TYPE ty_helper_type.
+
+ENDCLASS.
+
+CLASS lcl_main IMPLEMENTATION.
+
+  METHOD main.
+*  data: lv_lines TYPE i.
+    SELECT
+     FROM vbak
+     FIELDS vbeln,vkorg,vkgrp
+     INTO TABLE @DATA(it_vbak)
+     UP TO 100 ROWS.
+    IF sy-subrc IS INITIAL.
+      DATA(lv_lines) = lines( it_vbak  ).
+    ENDIF.
+
+    LOOP AT it_vbak ASSIGNING FIELD-SYMBOL(<ls_vbak>).
+
+    ENDLOOP.
+
+    READ TABLE it_vbak ASSIGNING FIELD-SYMBOL(<ls_vbak1>)
+                       INDEX 1.
+    READ TABLE it_vbak INTO ls_vbak INDEX 1.
+
+    cl_salv_table=>factory(
+*      EXPORTING
+*        list_display   = if_salv_c_bool_sap=>false
+*        r_container    =
+*        container_name =
+      IMPORTING
+        r_salv_table   =  DATA(lr_alv)
+      CHANGING
+        t_table        = it_vbak
+    ).
+*    CATCH cx_salv_msg.
+    lr_alv->display( ).
+
+
+  ENDMETHOD.
+
+ENDCLASS.
+
+
+
+
+START-OF-SELECTION.
+
+  lcl_main=>main( ).

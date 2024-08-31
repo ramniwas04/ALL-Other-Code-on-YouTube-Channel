@@ -1,0 +1,81 @@
+*&---------------------------------------------------------------------*
+*& Report ztestlksldkl
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ztestlksldkl.
+*Select on internal table
+*When we have to get data using select but halg of the data proce ss separately
+*A condition for the table key used in the FILTER expression must be specified after WHERE:
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.
+
+CLASS demo IMPLEMENTATION.
+
+  METHOD main.
+    TYPES: BEGIN OF ty_vbak,
+             vbeln TYPE vbak-vbeln,
+             vkorg TYPE vbak-vkorg,
+             netwr TYPE vbak-netwr,
+           END OF ty_vbak.
+
+    DATA: it_vbak TYPE STANDARD TABLE OF ty_vbak WITH NON-UNIQUE SORTED KEY org COMPONENTS vkorg.
+    DATA: lt_vbak_na01  TYPE STANDARD TABLE OF ty_vbak.
+    DATA: lt_vbak_other  TYPE STANDARD TABLE OF ty_vbak.
+    DATA: lt_vbak_usd  TYPE STANDARD TABLE OF ty_vbak.
+
+    SELECT
+     FROM vbak
+     FIELDS vbeln,vkorg,netwr
+     WHERE vkorg IN ( 'NA01','S100', 'VVSO' )
+     INTO TABLE @it_vbak
+     UP TO 100 ROWS.
+
+    IF sy-subrc IS INITIAL.
+      SELECT
+       FROM tvko
+       FIELDS vkorg,waers
+       WHERE waers = 'USD'
+       INTO TABLE @DATA(lt_usd_org).
+      IF sy-subrc IS INITIAL.
+        lt_vbak_usd = FILTER #( it_vbak USING KEY org IN lt_usd_org WHERE vkorg = vkorg ).
+      ENDIF.
+
+      cl_demo_output=>write(
+    EXPORTING
+      data = lt_vbak_usd
+*           name =
+  ).
+
+
+*      cl_demo_output=>write(
+*        EXPORTING
+*          data = it_vbak
+**           name =
+*      ).
+*
+*      lt_vbak_na01 =  FILTER #( it_vbak USING KEY org WHERE vkorg = 'NA01' ).
+*      cl_demo_output=>write(
+*       EXPORTING
+*         data = lt_vbak_na01
+**           name =
+*     ).
+*      lt_vbak_other =  FILTER #( it_vbak EXCEPT USING KEY org WHERE vkorg = 'NA01' ).
+*
+*      cl_demo_output=>display(
+*        EXPORTING
+*          data = lt_vbak_other
+**           name =
+*      ).
+    ENDIF.
+
+
+  ENDMETHOD.
+
+ENDCLASS.
+
+START-OF-SELECTION.
+  demo=>main( ).

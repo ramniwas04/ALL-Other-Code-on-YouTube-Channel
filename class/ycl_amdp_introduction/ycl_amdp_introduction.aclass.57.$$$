@@ -1,0 +1,59 @@
+CLASS ycl_amdp_introduction DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+   Inter
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+ENDCLASS.
+
+
+
+CLASS ycl_amdp_introduction IMPLEMENTATION.
+ENDCLASS.
+
+
+* It will create SQLScript procedure YCL_AMDP_INTRODUCTION=>GET_VBAK
+* in the ABAP DB schema
+*How to access another AMDP procedure 
+*CALL "CLASS=>METH"( f1 => a1, f2 => a2, ... ); 
+*The parameter interface of an SQLScript procedure supports input 
+*IN, OUT, INOUT(It can be only scalar) 
+*AMDP -> SQL script Conversion parameter interface
+* IMPORTING => IN
+* EXPORTING => OUT
+* CHANGING (SCALAR)  => INOUT 
+* CHANGING (Tabular)  => IN and OUT two parameter
+*   Since SQL script not support INOUT tabular parameter
+*  NAme  OUT = Changing parameter name
+*        IN   = Changing_parameter_IN_
+
+*AMDP Method for ◾AMDP procedure implementations 
+*methods without a return value
+*•AMDP procedure implementations with the addition BY DATABASE PROCEDURE 
+ 
+
+
+
+
+*Parameter interface of an AMDP procedure implementation: 
+*◾The typing of the parameters must not be generic. 
+*    >>Only elementary data types and table types with a structured row type can be used. 
+*    >>The row type of a tabular type can only contain elementary data types as components 
+*◾The parameters must be declared using VALUE for pass by value
+*◾Return values cannot be declared using RETURNING. 
+*◾Only input parameters can be flagged as optional parameters. 
+*  >>Each elementary optional input parameter must have a replacement parameter declared using DEFAULT.
+*  >>An optional tabular input parameter cannot have any replacement parameters and must be made optional instead using OPTIONAL. 
+
+*The following restrictions apply to method implementation: 
+*◾An AMDP method must not be empty. 
+*◾DDL statements are not allowed for creating, changing or deleting database objects
+*◾no database commits and  database rollbacks using COMMIT and ROLLBACK statements are allowed
+*◾Writes cannot be performed on database tables where table buffering is switched on, since SQLScript accesses are ignored by buffer synchronizations. 
+*◾AMDP methods do not have any implicit enhancement options
+
+
+ 

@@ -1,0 +1,58 @@
+*&---------------------------------------------------------------------*
+*& Report z_eclipse_tips
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT z_eclipse_tips.
+**********************************************************************
+*Copy a section of a program
+*CTRL + ALT + arrow down(↓)
+**********************************************************************
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.
+
+CLASS demo IMPLEMENTATION.
+
+  METHOD main.
+    DATA: lv_ts TYPE timestampl.
+    CONVERT DATE sy-datum
+            TIME sy-uzeit
+            INTO TIME STAMP lv_ts
+            TIME ZONE 'UTC+12'.
+    IF sy-subrc IS INITIAL.
+      WRITE lv_ts USING EDIT MASK '____-__-__T__:__:__.___Z' .
+    ENDIF.
+  ENDMETHOD.
+
+ENDCLASS.
+
+START-OF-SELECTION.
+  demo=>main( ).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*  ddadadadad
+
+* Views :-
+*->Open a view CTRL + 3 OR from menu bar
+*-> 1. Project Explorer:- Favorite Packages and Favorite Objects

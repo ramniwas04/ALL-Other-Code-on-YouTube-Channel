@@ -1,0 +1,12 @@
+@EndUserText.label : 'Employee table'
+@AbapCatalog.enhancementCategory : #EXTENSIBLE_ANY
+@AbapCatalog.tableCategory : #TRANSPARENT
+@AbapCatalog.deliveryClass : #A
+@AbapCatalog.dataMaintenance : #ALLOWED
+define table zemployee_ram {
+  key client : abap.clnt not null;
+  key id     : char10 not null;
+  name       : char50;
+  age        : zage_r;
+
+}

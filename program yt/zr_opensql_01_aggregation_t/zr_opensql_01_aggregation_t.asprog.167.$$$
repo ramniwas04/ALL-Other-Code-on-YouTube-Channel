@@ -1,0 +1,25 @@
+*&---------------------------------------------------------------------*
+*& Report zr_opensql_01_aggregation_t
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zr_opensql_01_aggregation_t.
+*◾If GROUP BY is used, the statement SELECT bypasses table buffering.
+SELECT
+ FROM vbak AS a
+ INNER JOIN vbap AS b
+ ON a~vbeln = b~vbeln
+ INNER JOIN kna1 as c
+ on a~kunnr = c~kunnr
+ FIELDS a~kunnr,
+        c~name1,
+        b~waerk,
+        SUM( b~netpr ) AS net_price,
+        AVG( b~netpr ) as net_price_avg,
+        MAX( b~netpr ) as net_price_max,
+        MIN( b~netpr ) as net_price_min
+ GROUP BY a~kunnr,c~name1,b~waerk
+ INTO TABLE @DATA(lt_so).
+IF sy-subrc IS INITIAL.
+  cl_demo_output=>display_data( value = lt_so ).
+ENDIF.

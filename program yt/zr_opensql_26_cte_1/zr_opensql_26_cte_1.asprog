@@ -1,0 +1,48 @@
+*&---------------------------------------------------------------------*
+*& Report zr_opensql_26_cte
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zr_opensql_26_cte_1.
+
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    TYPES: BEGIN OF ls_result,
+             carrname TYPE scarr-carrname,
+             connid   TYPE spfli-connid,
+             cityfrom TYPE spfli-cityfrom,
+             cityto   TYPE spfli-cityto,
+             cnt      TYPE int8,
+           END OF ls_result.
+    CLASS-DATA it_result TYPE TABLE OF ls_result WITH EMPTY KEY.
+    CLASS-METHODS main.
+ENDCLASS.
+
+
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+
+    WITH
+      +conns AS (
+        SELECT carrname, connid, cityfrom, cityto
+              FROM spfli
+                JOIN scarr ON spfli~carrid = scarr~carrid
+              WHERE spfli~carrid = 'LH' ),
+
+      +cnts AS (
+        SELECT COUNT(*) AS cnt
+               FROM +conns )
+
+      SELECT *
+             FROM +cnts
+               CROSS JOIN +conns
+             ORDER BY carrname, connid
+             INTO CORRESPONDING FIELDS of TABLE @it_result.
+
+    cl_demo_output=>display( it_result ).
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  demo=>main( ).

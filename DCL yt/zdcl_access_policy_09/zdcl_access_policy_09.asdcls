@@ -1,0 +1,11 @@
+define accesspolicy ZDCL_ACCESS_POLICY_09 {
+    @EndUserText.label: 'ZDCL_access_policy_09'
+    define aspect ZDCL_ACCESS_POLICY_09 as
+        select from ZDDLS_SAMPLE_09_INHERITDCL         
+             with user element ernam
+            {
+              vbtyp,
+              vkorg
+            }
+            
+}

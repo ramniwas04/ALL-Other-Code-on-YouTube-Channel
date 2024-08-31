@@ -1,0 +1,296 @@
+*&---------------------------------------------------------------------*
+*& Report z_table_expression
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT z_table_expression.
+*1. Segment read with index
+*(a)Simple read with index
+*(b)Read index with table expression
+*(c)table expression without try catch  using value  operator
+*(d)table expression with assign fs
+*2. Read using a without key and table key
+*(a)Simple read with condition
+*(b)Read with table expression
+*3.Check for line exist
+*4.Get table index
+*5.Performance comparision
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.
+
+CLASS demo IMPLEMENTATION.
+
+  METHOD main.
+    TYPES: BEGIN OF helper_type,
+             vbeln TYPE vbak-vbeln,
+             vkorg TYPE vbak-vkorg,
+             vkgrp TYPE vbak-vkgrp,
+             kunnr TYPE vbak-kunnr,
+             netwr TYPE vbak-netwr,
+           END OF helper_type.
+    DATA: lt_vbak TYPE STANDARD TABLE OF helper_type
+                 WITH UNIQUE SORTED KEY key1 COMPONENTS vbeln.
+
+    SELECT
+      FROM vbak
+      FIELDS vbeln,vkorg,vkgrp,kunnr,netwr
+      INTO TABLE @lt_vbak
+      UP TO 50 ROWS.
+    IF sy-subrc IS INITIAL.
+*      cl_demo_output=>write( lt_vbak ).
+*      READ TABLE lt_vbak TRANSPORTING NO FIELDS
+*                         WITH KEY vbeln = '0000000006'.
+*      IF sy-subrc IS INITIAL.
+*        cl_demo_output=>write( lt_vbak ).
+*      ENDIF.
+*      IF line_exists( lt_vbak[ KEY key1 vbeln = '0000000006' ]  ).
+*        cl_demo_output=>display( lt_vbak ).
+*      ENDIF.
+
+      DATA(lv_index) = line_index( lt_vbak[ KEY key1 vbeln = '0000000006' ]  ).
+      cl_demo_output=>display( lv_index ).
+
+*      READ TABLE lt_vbak INTO DATA(ls_vbak)
+*                         WITH KEY vbeln = '0000000006'.
+*      IF sy-subrc IS INITIAL.
+*        cl_demo_output=>write( ls_vbak ).
+*      ENDIF.
+*
+*      READ TABLE lt_vbak INTO ls_vbak
+*                         WITH TABLE KEY key1
+*                         COMPONENTS vbeln = '0000000006'.
+*      IF sy-subrc IS INITIAL.
+*        cl_demo_output=>write( ls_vbak ).
+*      ENDIF.
+*
+*      ASSIGN  lt_vbak[ vbeln = '0000000006' ] TO FIELD-SYMBOL(<ls_vbak>).
+*      IF sy-subrc IS INITIAL.
+*        cl_demo_output=>write( <ls_vbak> ).
+*      ENDIF.
+*
+*      ASSIGN  lt_vbak[ KEY key1 vbeln = '0000000006' ] TO <ls_vbak>.
+*      IF sy-subrc IS INITIAL.
+*        cl_demo_output=>display( <ls_vbak> ).
+*      ENDIF.
+
+*      READ TABLE lt_vbak INTO DATA(ls_vbak) INDEX 52.
+*      IF sy-subrc IS INITIAL.
+*        cl_demo_output=>write( ls_vbak ).
+*      ENDIF.
+***********************************************************************
+*      CLEAR ls_vbak.
+*      TRY.
+*          ls_vbak = lt_vbak[ 52 ].
+*        CATCH   cx_sy_itab_line_not_found .
+*      ENDTRY.
+*      cl_demo_output=>write( ls_vbak ).
+***********************************************************************
+*
+*      CLEAR ls_vbak.
+*      ls_vbak = VALUE #( lt_vbak[ 5 ] OPTIONAL ).
+*      cl_demo_output=>write( ls_vbak ).
+*
+*      ASSIGN  lt_vbak[ 51 ] TO FIELD-SYMBOL(<ls_vbak>).
+*      IF sy-subrc IS INITIAL.
+*        cl_demo_output=>write( <ls_vbak> ).
+*      ENDIF.
+***********************************************************************
+*      DATA(ls_vbak_1) = VALUE #( lt_vbak[ 6 ] DEFAULT ls_vbak ).
+*      cl_demo_output=>display( ls_vbak_1 ).
+***********************************************************************
+
+    ENDIF.
+  ENDMETHOD.
+
+ENDCLASS.
+
+START-OF-SELECTION.
+  demo=>main( ).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*Importent points:-
+*. Note, that table expressions are mainly made for usage at
+*operand positions and not for standalone usage..
+*Note, that table expressions are mainly made for
+*usage at operand positions and not for standalone usage.
+
+**Internal tables always have a primary key
+**and can have up to 15 optional secondary table keys.
+*
+**Standard tables are automatically assigned a standard key
+** if an explicit primary key is not defined.
+*
+**Each internal table has a primary table key that
+** is either a self-defined key or the standard key.
+**whose key fields in a structured row type are all table fields with
+**character-like data types and byte-like data types.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*CLASS demo DEFINITION.
+*  PUBLIC SECTION.
+*    CLASS-METHODS main.
+*ENDCLASS.
+*
+*CLASS demo IMPLEMENTATION.
+*
+*  METHOD main.
+*    TYPES: BEGIN OF helper_type,
+*             vbeln TYPE vbak-vbeln,
+*             vkorg TYPE vbak-vkorg,
+*             vkgrp TYPE vbak-vkgrp,
+*             netwr TYPE vbak-netwr,
+*             kunnr TYPE vbak-kunnr,
+*           END OF helper_type.
+*    DATA: lt_vbak TYPE STANDARD TABLE OF helper_type
+*                  WITH UNIQUE SORTED KEY key_vb COMPONENTS vbeln .
+*    SELECT
+*     FROM vbak
+*     FIELDS vbeln,vkorg,vkgrp,netwr,kunnr
+*     INTO TABLE @lt_vbak
+*     UP TO 100 ROWS.
+*    IF sy-subrc IS INITIAL.
+**    demo_tab_exp_line
+**1. Segment read with index
+*      cl_demo_output=>write( lt_vbak ).
+**(a)Simple read with index
+*      READ TABLE lt_vbak INTO DATA(ls_vbak) INDEX 1 USING KEY primary_key.
+*      IF sy-subrc IS INITIAL.
+*        cl_demo_output=>write( ls_vbak ).
+*      ENDIF.
+**
+*      READ TABLE lt_vbak INTO ls_vbak INDEX 1 USING KEY key_vb .
+*      IF sy-subrc IS INITIAL.
+*        cl_demo_output=>write( ls_vbak ).
+*      ENDIF.
+**(b)Read index with table expression
+*      TRY.
+*          DATA(lwa_vbak) = lt_vbak[ 1 ].
+*        CATCH   cx_sy_itab_line_not_found.
+*      ENDTRY.
+*      cl_demo_output=>write( lwa_vbak ).
+*
+*      TRY.
+*          lwa_vbak = lt_vbak[ KEY key_vb INDEX 1 ].
+*        CATCH   cx_sy_itab_line_not_found .
+*      ENDTRY.
+*      cl_demo_output=>write( lwa_vbak ).
+*
+**Note :- (a) and (b) used primary table key
+
+*
+**(c)Read table without try catch  using value  operator
+*      lwa_vbak = VALUE #( lt_vbak[ 105 ] OPTIONAL ).
+*      lwa_vbak = VALUE #( lt_vbak[ 105 ] DEFAULT  lwa_vbak ).
+**(d)Read index with table expression with assign fs
+*      ASSIGN lt_vbak[ 5 ] TO FIELD-SYMBOL(<ls_vbak>).
+*      IF sy-subrc IS INITIAL.
+*        cl_demo_output=>display( <ls_vbak> ).
+*      ENDIF.
+*
+***********************************************************************
+***2. Read using a free key
+**(a)Simple read with condition
+*      CLEAR ls_vbak.
+*      READ TABLE lt_vbak INTO ls_vbak WITH KEY vbeln = '0000000008'.
+*      IF sy-subrc IS INITIAL.
+*        cl_demo_output=>write( ls_vbak ).
+*      ENDIF.
+**
+*      READ TABLE lt_vbak INTO ls_vbak WITH TABLE KEY key_vb
+*                                     COMPONENTS vbeln = '0000000008' .
+*      IF sy-subrc IS INITIAL.
+*        cl_demo_output=>write( ls_vbak ).
+*      ENDIF.
+**(b)Read with key with table expression
+*      TRY.
+*          lwa_vbak = lt_vbak[ vbeln = '0000000008' ].
+*        CATCH   cx_sy_itab_line_not_found.
+*      ENDTRY.
+*      cl_demo_output=>write( lwa_vbak ).
+*
+*      TRY.
+*          lwa_vbak = lt_vbak[ KEY key_vb vbeln = '0000000008' ].
+*        CATCH   cx_sy_itab_line_not_found .
+*      ENDTRY.
+*      cl_demo_output=>write( lwa_vbak ).
+*
+**Check for line exist
+*      READ TABLE lt_vbak TRANSPORTING NO FIELDS
+*                 WITH KEY vbeln =  '0000000008'.
+*      IF sy-subrc IS INITIAL.
+*
+*      ENDIF.
+*
+*      IF line_exists( lt_vbak[ vbeln = '0000000008' ] ) .
+*
+*      ENDIF.
+*
+**Get table index
+*      READ TABLE lt_vbak TRANSPORTING NO FIELDS
+*                 WITH KEY vbeln =  '0000000008'.
+*      IF sy-subrc IS INITIAL.
+*        DATA(lv_index) = sy-index.
+*      ENDIF.
+*
+*      lv_index =  line_index( lt_vbak[ vbeln = '0000000008' ] ) .
+*
+*
+**
+*
+***********************************************************************
+*
+*    ENDIF.
+*  ENDMETHOD.
+*
+*ENDCLASS.

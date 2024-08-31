@@ -1,0 +1,78 @@
+*&---------------------------------------------------------------------*
+*& Report z_groupby_internal_table
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT z_groupby_internal_table.
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.
+
+CLASS demo IMPLEMENTATION.
+
+  METHOD main.
+    TYPES: BEGIN OF ty_vbak,
+             vbeln TYPE vbak-vbeln,
+             vkorg TYPE vbak-vkorg,
+             vkgrp TYPE vbak-vkgrp,
+             count TYPE i,
+             index TYPE i,
+           END OF ty_vbak,
+           tt_vbak TYPE TABLE OF ty_vbak WITH DEFAULT KEY.
+    DATA: lt_vbak TYPE STANDARD TABLE OF ty_vbak.
+    DATA: lt_vbak_grp TYPE STANDARD TABLE OF ty_vbak.
+
+    SELECT
+      FROM vbak
+      FIELDS vbeln,vkorg,vkgrp
+      INTO TABLE @lt_vbak.
+    IF sy-subrc IS INITIAL  .
+      DATA : lr_out TYPE REF TO if_demo_output.
+
+
+      lr_out = REDUCE #( INIT lr_dis = cl_demo_output=>new( )
+                            FOR GROUPS <lt_grp> OF <ls_vbak> IN lt_vbak
+                            GROUP BY ( vkorg =  <ls_vbak>-vkorg
+                                vkgrp =  <ls_vbak>-vkgrp
+                                 count = GROUP SIZE
+                                 index = GROUP INDEX )
+                                WITHOUT MEMBERS
+*                              LET  lt_vbak_grp1 = VALUE tt_vbak( FOR <ls_grp> IN GROUP <lt_grp> ( <ls_grp> )  )
+*                              IN
+                              NEXT lr_dis = lr_dis->write( <lt_grp> )
+                             ).
+
+
+
+      lr_out->display(  ).
+*      LOOP AT lt_vbak ASSIGNING FIELD-SYMBOL(<ls_vbak>)
+*                      GROUP BY ( vkorg =  <ls_vbak>-vkorg
+*                                 vkgrp =  <ls_vbak>-vkgrp
+*                                 count = GROUP SIZE
+*                                 index = GROUP INDEX )
+*                         DESCENDING
+*                      WITHOUT MEMBERS
+*                      ASSIGNING FIELD-SYMBOL(<lt_grp>).
+**        CLEAR    lt_vbak_grp.
+**        LOOP AT GROUP <lt_grp> ASSIGNING FIELD-SYMBOL(<ls_grp>).
+**          lt_vbak_grp =  VALUE #( BASE  lt_vbak_grp ( <ls_grp> ) ).
+**        ENDLOOP.
+*
+**        lt_vbak_grp = VALUE  #( FOR <ls_grp> IN GROUP <lt_grp> ( <ls_grp> ) ).
+*
+*        cl_demo_output=>write( <lt_grp> ).
+*      ENDLOOP.
+    ENDIF.
+
+
+    cl_demo_output=>display( ).
+
+
+
+  ENDMETHOD.
+
+ENDCLASS.
+
+START-OF-SELECTION.
+  demo=>main( ).

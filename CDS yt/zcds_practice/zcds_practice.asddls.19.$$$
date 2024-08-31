@@ -1,0 +1,32 @@
+@AbapCatalog.sqlViewName: 'ZVCDS_PRACTICE'//Mandatory
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'ssds'
+define view ZCDS_practice
+  as select from vbak
+{
+  key vbeln as so,
+      vkorg as sales_org,   
+      vkgrp as sales_grp
+}
+ 
+/*CDS are a collection of domain specific languages and services for defining 
+//and consuming semantically reach data model.
+//Collection of Domain specific languages  :- DDL ,DCL, QL
+//
+//Semantically :- Domain Vs Data element (Renaming fields)
+//
+//Data Model : - Represent relationships within DB
+
+//SQL views and CDS entities are part of one and the same namespace.
+//Therefore, you must assign different names for an SQL view and 
+//the entity.
+
+//Show before activating and try to edit in se11
+//Keyword should be all uppercase and owercase or camel case
+//Show SQl console
+--show diff kind of comments
+--Show SQL statement which create HANA view
+
+*/

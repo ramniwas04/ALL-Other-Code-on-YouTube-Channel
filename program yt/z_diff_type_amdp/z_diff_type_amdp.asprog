@@ -1,0 +1,62 @@
+*&---------------------------------------------------------------------*
+*& Report z_diff_type_amdp
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT z_diff_type_amdp.
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.
+
+CLASS demo IMPLEMENTATION.
+
+  METHOD main.
+    DATA: lv_carrid TYPE spfli-carrid VALUE 'LH'.
+
+    zcl_diff_types_amdp=>get_scarr_spfli_pro(
+      EXPORTING
+        iv_mandt       = sy-mandt
+        iv_carrid      = lv_carrid
+      IMPORTING
+    et_scarr_spfli = DATA(it_out)
+    ).
+
+    zcl_diff_types_amdp=>get_max_fltime_scalar_fun(
+      EXPORTING
+        iv_mandt       = sy-mandt
+        iv_carrid      = lv_carrid
+      RECEIVING
+        et_fl_max_time = DATA(lv_maxtime)
+    ).
+
+    zcl_diff_types_amdp=>get_flight_detail_maxfltime(
+      EXPORTING
+        iv_mandt       = sy-mandt
+        iv_carrid      = lv_carrid
+      IMPORTING
+        et_scarr_spfli = DATA(it_spfli)
+    ).
+
+    SELECT carrid,
+            connid  ,
+            cityfrom,
+            cityto  ,
+            fltime
+         FROM spfli
+         WHERE carrid = @lv_carrid
+         AND   fltime = @( zcl_diff_types_amdp=>get_max_fltime_scalar_fun(
+                             iv_mandt  = sy-mandt
+                             iv_carrid = lv_carrid
+                           ) )
+          INTO TABLE @DATA(it__result).
+
+    cl_demo_output=>write( it_spfli ).
+    cl_demo_output=>display( it__result ).
+
+  ENDMETHOD.
+
+ENDCLASS.
+
+START-OF-SELECTION.
+  demo=>main( ).

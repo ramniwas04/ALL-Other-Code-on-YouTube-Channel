@@ -1,0 +1,52 @@
+*&---------------------------------------------------------------------*
+*& Report zr_opensql_00_syntax_t
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zr_opensql_00_syntax_t.
+
+TYPES: BEGIN OF ty_so_amount,
+         so_id           TYPE snwd_so-so_id,
+         currency_code   TYPE snwd_so-currency_code,
+         gross_amount    TYPE snwd_so-gross_amount,
+         delivery_status TYPE snwd_so-delivery_status,
+       END OF ty_so_amount.
+
+DATA lt_so_amount TYPE STANDARD TABLE OF ty_so_amount.
+*
+**"using the "old" Open SQL syntax
+SELECT so_id 
+       currency_code
+       gross_amount
+       delivery_status
+  FROM snwd_so
+  INTO TABLE lt_so_amount
+  UP TO 10 ROWS
+  WHERE currency_code = 'EUR'.
+
+SELECT
+ from snwd_so 
+  FIELDS   so_id,
+       currency_code,
+       gross_amount,
+       delivery_status
+  WHERE  currency_code = 'EUR'
+    INTO TABLE @DATA(lt_tab)
+    UP TO 10 rows
+    .
+    
+       
+       
+
+*Enhanced Open SQL
+*comma  vs blank separated  + host variable @
+*Into clause can come at the end
+*Fields key word
+
+
+
+cl_demo_output=>display(
+  EXPORTING
+    data = lt_so_amount
+*      name =
+).

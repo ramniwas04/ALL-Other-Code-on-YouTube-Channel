@@ -1,0 +1,10 @@
+@EndUserText.label: 'YDCL_sample_02_1'
+@MappingRole: true
+define role YDCL_SAMPLE_02_1 {
+    grant
+        select
+            on
+                YDDLS_SAMPLE_02
+                    where
+                        vbtyp = 'C';                        
+}

@@ -1,0 +1,23 @@
+CLASS zcl_fall_back DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+
+    INTERFACES if_badi_interface .
+    INTERFACES zif_kernel_badi_int .
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+ENDCLASS.
+
+
+
+CLASS zcl_fall_back IMPLEMENTATION.
+  METHOD zif_kernel_badi_int~modify_vbak.
+    LOOP AT it_vbak ASSIGNING FIELD-SYMBOL(<ls_vbak>).
+      <ls_vbak>-zzdate = sy-datum.
+      <ls_vbak>-zzusername = sy-uname.
+    ENDLOOP.
+  ENDMETHOD.
+ENDCLASS.

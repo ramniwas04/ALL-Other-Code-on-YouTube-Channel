@@ -1,0 +1,74 @@
+*&---------------------------------------------------------------------*
+*& Report z_new_value_operator
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT z_new_value_operator.
+
+*Difference between Field symbol and reference variable
+*Reference variable with new syntax
+
+*NEW operator to initiate a class (Create a class with constructor)
+*New Operator to create structure and  table entries with #, data type and base
+*     ->Create a table data element and domain
+*     ->Create a work area entry and  table entries
+*Value Operator to create structure and table entries with #, data type and base (internal range table)
+*Value operator craete a work area
+*Base operator
+
+TYPES: tt_zemployee_ram TYPE TABLE OF zemployee_ram WITH DEFAULT KEY.
+TYPES: ts_zemployee_ram TYPE zemployee_ram.
+
+DATA:    ls_zemployee_ram1 TYPE REF TO zemployee_ram.
+
+
+*DATA(ls_zemployee_ram) = NEW ts_zemployee_ram( client = sy-mandt
+*                                               id     = '1' name = 'Ram'  age = '30'   ).
+ls_zemployee_ram1 = NEW #( client = sy-mandt
+                                               id     = '1' name = 'Ram'  age = '30'   ).
+
+*DATA(lt_zemployee_ram) = NEW tt_zemployee_ram( ( client = sy-mandt    id     = '1' name = 'Ram'  age = '30' )
+*                                               ( client = sy-mandt    id     = '2' name = 'Ram'  age = '30' )  ).
+
+DATA(ls_zemployee_ram) = VALUE ts_zemployee_ram( client = sy-mandt
+                                              id     = '1' name = 'Ram'  age = '30'   ).
+
+DATA(lt_zemployee_ram) = VALUE tt_zemployee_ram( ( client = sy-mandt    id     = '1' name = 'Ram'  age = '30' )
+                                               ( client = sy-mandt    id     = '2' name = 'Ram'  age = '30' )  ).
+
+DATA lt_zemployee_ram_1 TYPE TABLE OF   zemployee_ram.
+
+lt_zemployee_ram_1 = VALUE #( BASE lt_zemployee_ram (  client = sy-mandt    id     = '3' name = 'Ram'  age = '30' ) ).
+
+cl_demo_output=>display(
+  EXPORTING
+    data = lt_zemployee_ram_1
+*             name =
+).
+
+
+*DATA: lr_obj TYPE REF TO zcl_new_check.
+*CREATE OBJECT lr_obj
+*  EXPORTING
+*    iv_attr = 'ram'
+*  ..
+*
+*DATA(lr_obj1) = NEW zcl_new_check( iv_attr = 'ram'  ).
+
+
+*DATA : lv_ref_int TYPE REF TO i.
+*
+*CREATE DATA lv_ref_int.
+*lv_ref_int->* = 1.
+*
+*data(lv_dref2) = NEW i( 1 ).
+*
+*WRITE : lv_dref2->*.
+*
+*ASSIGN lv_ref_int->* TO FIELD-SYMBOL(<fs_int>).
+*
+*WRITE : <fs_int>.
+*
+*DATA : lv_var1 TYPE i.
+*
+*ASSIGN   lv_var1 TO <fs_int>.

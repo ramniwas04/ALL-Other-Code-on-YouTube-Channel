@@ -1,0 +1,24 @@
+*&---------------------------------------------------------------------*
+*& Report yram_dynamic
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT yram_dynamic.
+
+SUBMIT /1bcdwb/dbmara VIA SELECTION-SCREEN
+       AND RETURN EXPORTING LIST TO MEMORY.
+
+DATA  :  list_tab TYPE STANDARD TABLE OF abaplist WITH HEADER LINE .
+
+CALL FUNCTION 'LIST_FROM_MEMORY'
+  TABLES
+    listobject = list_tab
+  EXCEPTIONS
+    not_found  = 1
+    OTHERS     = 2.
+
+IF sy-subrc = 0.
+  CALL FUNCTION 'WRITE_LIST'
+    TABLES
+      listobject = list_tab.
+ENDIF.

@@ -1,0 +1,31 @@
+@EndUserText.label: 'DCL for SAMPLE_02'
+@MappingRole: true
+define role YDCL_SAMPLE_02 {
+    grant
+        select
+            on
+                YDDLS_SAMPLE_02
+                where
+                    (sales_org) = aspect pfcg_auth( YVKORG,YSALES_ORG,ACTVT='03' );    
+   grant
+        select
+            on
+                YDDLS_SAMPLE_02
+                combination mode and  // OR
+                where
+                    sales_org = 'NA01';                                         
+}
+
+//  Craete basic access controll using literal
+//Expalin auth annotation with diffrent values
+// Access controll disable
+//sql with pre sy-subrc/full access role/cds inside another cds
+//
+
+//Create auth class and auth object
+//Create new auth field and add it z_vkorg
+//use this auth object in our DCL
+
+//Create new role in PFGC
+//Assign auth object to this role and define some values
+

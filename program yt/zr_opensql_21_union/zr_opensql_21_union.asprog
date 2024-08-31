@@ -1,0 +1,24 @@
+*&---------------------------------------------------------------------*
+*& Report zr_opensql_20_unioon_grp_by
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zr_opensql_21_union.
+
+SELECT FROM scarr
+       FIELDS carrname,
+              CAST( '-' AS CHAR( 4 ) ) AS connid,
+              '-' AS cityfrom,
+              '-' AS cityto
+       WHERE carrid = 'LH'
+  UNION
+    SELECT FROM spfli
+           FIELDS '-' AS carrname,
+                  CAST( connid AS CHAR( 2 ) ) AS connid,
+                  cityfrom,
+                  cityto
+           WHERE carrid = 'LH'
+   ORDER BY carrname DESCENDING, connid, cityfrom, cityto
+   INTO TABLE @DATA(result).
+
+cl_demo_output=>display( result ).

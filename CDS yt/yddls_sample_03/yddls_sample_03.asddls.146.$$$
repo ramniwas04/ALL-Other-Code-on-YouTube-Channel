@@ -1,0 +1,23 @@
+@AbapCatalog.viewEnhancementCategory: [#NONE]
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'cunsumption view'
+@Metadata.ignorePropagatedAnnotations: true
+@ObjectModel.usageType:{
+    serviceQuality: #X,
+    sizeCategory: #S,
+    dataClass: #MIXED
+}
+define view entity YDDLS_SAMPLE_03
+  as select from Yddls_Sample_02._item
+  association[1..*] to makt as _makt
+//    on Yddls_Sample_02._item.matnr = _makt.maktx
+    on $projection.Matnr = _makt.maktx
+{
+  vbeln,
+  posnr,
+  matnr,
+  _makt.maktx
+}
+
+--> It create Inner Join
+-->

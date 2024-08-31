@@ -1,0 +1,40 @@
+*&---------------------------------------------------------------------*
+*& Report z_kernel_badi_example
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT z_kernel_badi_example.
+
+DATA: lv_vbeln TYPE vbeln.
+SELECTION-SCREEN BEGIN OF BLOCK b1 WITH FRAME TITLE TEXT-001.
+  SELECT-OPTIONS:s_vbeln FOR lv_vbeln.
+  PARAMETERS:           p_vkorg TYPE vkorg .
+SELECTION-SCREEN END OF BLOCK b1.
+
+START-OF-SELECTION.
+  DATA : it_vbak TYPE STANDARD TABLE OF vbak,
+         lr_badi TYPE REF TO z_sales_order_badi.
+
+  SELECT *
+   FROM vbak
+   INTO TABLE @it_vbak
+   WHERE vbeln IN @s_vbeln
+   and   vkorg = @p_vkorg.
+  IF sy-subrc IS INITIAL.
+    GET BADI lr_badi FILTERS sales_org_filter = p_vkorg.
+
+    CALL BADI lr_badi->modify_header
+      CHANGING
+        it_vbak = it_vbak.
+
+    cl_salv_table=>factory(
+      IMPORTING
+        r_salv_table   = DATA(lr_alv)
+      CHANGING
+        t_table        = it_vbak
+    ).
+*CATCH cx_salv_msg.
+
+    lr_alv->display( ).
+
+  ENDIF.

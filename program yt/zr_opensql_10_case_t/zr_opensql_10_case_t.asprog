@@ -1,0 +1,26 @@
+*&---------------------------------------------------------------------*
+*& Report zr_opensql_10_case_t
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zr_opensql_10_case_t.
+
+SELECT
+ FROM vbak
+ FIELDS vbeln AS sales_order,
+        CASE vbtyp
+           WHEN 'C' THEN 'Order'
+           WHEN 'B' THEN 'Quotation'
+           WHEN 'H' THEN 'Returns'
+           ELSE 'Other Docs'
+           END AS document_category,
+           netwr AS net_amount,
+        CASE
+         WHEN netwr > 1000 THEN 'Higher amount document'
+         WHEN ( netwr > 500 AND netwr < 1000 ) THEN 'Medium amount'
+         ELSE  'Lower amount'
+         END AS amount_category
+ INTO TABLE @DATA(it_result).
+IF sy-subrc IS INITIAL.
+  cl_demo_output=>display( it_result ).
+ENDIF.

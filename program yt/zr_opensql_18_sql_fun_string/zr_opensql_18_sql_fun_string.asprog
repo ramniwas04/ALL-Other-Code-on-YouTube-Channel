@@ -1,0 +1,42 @@
+REPORT zr_opensql_18_sql_fun_string.
+*CONCAT,CONCAT_WITH_SPACE 3,length,instr,left,right,lpad3,rpad3,ltrim,rtrim
+*replace,lower,upper,substring3
+*demo_expressions
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.
+
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DELETE FROM demo_expressions.
+    INSERT demo_expressions FROM TABLE @( VALUE #( (  id = 1 char1 = ' 0123' char2 = 'aAaA ')  ) ).
+
+    SELECT
+     FROM demo_expressions
+     FIELDS char1 AS text1,
+            char2 AS text2,
+            concat( char1, char2 ) AS concat,
+            concat_with_space( char1, char2 , 1 ) AS concat_with_space,
+            length( char1 ) AS length,
+            instr( char1, '12' ) AS instr,
+            left( char1, 3 ) AS left,
+            right( char1, 3 ) AS right,
+            lpad( char1,10,'X' ) AS lpad,
+            rpad( char1,10,'X' ) AS rpad,
+            ltrim( char1,' ' ) AS ltrim,
+            rtrim( char1,'3' ) AS rtrim,
+            replace( char2,'Aa', '--' ) AS replace,
+            lower( char2 ) AS lower,
+            upper( char2 ) AS upper ,
+            substring( char2, 2,2 ) AS subst
+      INTO TABLE @DATA(it_result).
+    IF sy-subrc IS INITIAL.
+      cl_demo_output=>display( it_result ).
+    ENDIF.
+
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  demo=>main( ).

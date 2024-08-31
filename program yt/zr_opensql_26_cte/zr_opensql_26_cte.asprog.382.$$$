@@ -1,0 +1,98 @@
+*&---------------------------------------------------------------------*
+*& Report zr_opensql_26_cte
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zr_opensql_26_cte.
+
+
+
+WITH +aggr AS (
+                 SELECT
+                 FROM vbak
+                 FIELDS ' ' AS so,
+                        kunnr AS cust_id,
+                        waerk AS curre,
+                        SUM( netwr )  AS net_amount,
+                        COUNT( netwr )  AS so_count
+                 GROUP BY kunnr,waerk
+              )
+ SELECT
+     FROM vbak
+     FIELDS vbeln AS so,
+            kunnr AS cust_id,
+            waerk AS curre,
+            netwr AS net_amount,
+            1  AS so_count
+ UNION
+  SELECT so,
+         cust_id,
+         curre,
+         net_amount,
+         so_count
+    FROM +aggr
+ INTO TABLE @DATA(it_result).
+IF sy-subrc IS INITIAL.
+  cl_demo_output=>display( it_result ).
+ENDIF.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*WITH
+*  +cte1[( name1, name2, ... )] AS ( SELECT subquery_clauses [UNION ...] ), ,
+*  +cte2[( name1, name2, ... )] AS ( SELECT subquery_clauses [UNION ...] ),
+*  ... ]
+*  SELECT mainquery_clauses
+*         [UNION ...]
+*         INTO|APPENDING target
+*         [UP TO ...] [OFFSET ...]
+*         [abap_options].
+*[ENDWITH]
+
+
+*◾A common table expression creates a temporary tabular result
+*set, which can be accessed during execution of the WITH statement.
+*Common table expressions can therefore be thought of as temporary views,
+*which only exist for the duration of the database access
+*CTE create tabular result set via subquery
+*which can be used in subsequent queries
+*When subtotal require ++ instead of GTT we can use
+*Name should start with +
+*Optional name list
+
+
+
+**********************************************************************
+*WITH
+*  +cities AS (
+*    SELECT cityfrom AS city
+*           FROM spfli
+*           WHERE carrid = 'LH'
+*    UNION DISTINCT
+*    SELECT cityto AS city
+*           FROM spfli
+*           WHERE carrid = 'LH' )
+*  SELECT *
+*         FROM sgeocity
+*         WHERE city IN ( SELECT city
+*                                FROM +cities )
+*         INTO TABLE @DATA(result).
+*
+*cl_demo_output=>display( result ).
+**********************************************************************

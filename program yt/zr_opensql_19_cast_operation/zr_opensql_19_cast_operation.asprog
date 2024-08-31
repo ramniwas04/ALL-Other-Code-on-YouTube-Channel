@@ -1,0 +1,61 @@
+*&---------------------------------------------------------------------*
+*& Report zr_opensql_19_cast_operation
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zr_opensql_19_cast_operation.
+*CONCATENATE using chaining operator && col/literal/variable/expre
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.
+
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    DELETE FROM demo_expressions.
+    INSERT demo_expressions FROM @( VALUE #(
+             id   = 'X'
+             char1 = 'Ram '
+             char2 = 'SAP ABAP'
+             string1 = 'SAP Technomaniac'
+             num1 = 111
+             numlong1 = '123456789'
+             dec3 = '123.456'
+             dats2 = sy-datum ) ).
+
+    SELECT SINGLE
+           FROM demo_expressions
+           FIELDS char1 && ' ' && char2 AS chain,
+                  CONCAT( char1 , char2 ) as concat,
+**
+                  string1,
+                  CAST( num1     AS CHAR( 20 ) ) AS col1,
+                  CAST( numlong1 AS CHAR( 20 ) ) AS col2,
+                  CAST( dec3     AS CHAR( 20 ) ) AS col3,
+                  CAST( dats2    AS CHAR( 20 ) ) AS col4
+           WHERE id = 'X'
+           INTO @DATA(ls_result).
+
+    SELECT SINGLE
+           FROM demo_expressions
+           FIELDS  char1 && ' ' && char2 AS chain,
+                   num1 AS col1,
+                   numlong1 AS col2,
+                   dec3 AS col3,
+                   dats2 AS col4
+           WHERE id = 'X'
+           INTO @DATA(ls_result1).
+
+    CONCATENATE ls_result-chain  ls_result-concat ls_result-col1 ls_result-col2 ls_result-col3 ls_result-col4
+                INTO DATA(lv_txt)
+                SEPARATED BY space.
+
+**    concatenate ls_result1-col1 ls_result1-col2 ls_result1-col3 ls_result1-col4 INTO DATA(lv_txt).
+
+    cl_demo_output=>display( lv_txt ).
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  demo=>main( ).

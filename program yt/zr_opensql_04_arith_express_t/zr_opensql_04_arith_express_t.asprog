@@ -1,0 +1,34 @@
+*&---------------------------------------------------------------------*
+*& Report zr_opensql_04_arith_express_t
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zr_opensql_04_arith_express_t.
+
+*sql_exp - sql_num_func
+*,CEIL , Floor ,abs,round(2),DIV,MOD
+
+DATA : lv_discount TYPE p DECIMALS 1 VALUE '0.8'.
+
+SELECT
+ FROM vbak AS so
+ INNER JOIN vbap AS item
+ ON so~vbeln = item~vbeln
+ INNER JOIN kna1 as cust
+ on so~kunnr = cust~kunnr
+ FIELDS so~vbeln AS sales_order,
+        so~kunnr as cust_id,
+        cust~name1 as customer,
+        item~posnr AS sales_item,
+        item~netpr AS net_price,
+        item~netpr * @lv_discount AS net_discounted,
+        ceil( item~netpr ) AS ceil,
+        floor( item~netpr  ) AS floor,
+        abs( item~netpr  ) AS  abs,
+        round( item~netpr , 1 ) AS round,
+        div( CAST( item~netpr AS INT8 ) , 10 ) AS div,
+        mod( CAST( item~netpr AS INT8 ) , 10 ) AS mod
+ INTO TABLE @DATA(lt_result).
+ IF sy-subrc is INITIAL.
+   cl_demo_output=>display( lt_result ).
+ endif.

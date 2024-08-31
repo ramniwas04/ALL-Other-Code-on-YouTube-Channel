@@ -1,0 +1,8 @@
+interface ZIF_SALES_ORDER_INFO
+  public .
+
+
+  interfaces IF_BADI_INTERFACE .
+  METHODS modify_header
+    CHANGING it_vbak TYPE vbak_t.
+endinterface.

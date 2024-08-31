@@ -1,0 +1,12 @@
+*&---------------------------------------------------------------------*
+*& Report z_eclipse_main_views
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT z_eclipse_main_views.
+
+* Views :-
+*->Open a view CTRL + 3 OR from menu bar
+*-> 1. Project Explorer:- Add Favorite Packages and Favorite Objects
+*-> 2. Properties View :- Window -> Show View ->  Properties
+*-> 3. Data Preview  :- to display data of table

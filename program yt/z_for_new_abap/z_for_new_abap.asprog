@@ -1,0 +1,105 @@
+*&---------------------------------------------------------------------*
+*& Report z_for_new_abap
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT z_for_new_abap.
+*0.  Let expression in ABAP
+*1.  For:-Get some of the columns from one internal table to new internal table
+*2.  For:-Get some of lines based on some condition from one table to another table
+*3.  For:-Changing sequence of internal table some time needed to sort:-
+*4.  For:-Preparing a range table
+*5.  For:-Getting some data from third party want to add date field additional before updating in db tabe
+*6.  For:-C like for loop
+
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.
+
+CLASS demo IMPLEMENTATION.
+
+  METHOD main.
+    TYPES: BEGIN OF ty_vbak,
+             vbeln TYPE vbak-vbeln,
+             posnr TYPE vbap-posnr,
+             vkorg TYPE vbak-vkorg,
+             vkgrp TYPE vbak-vkgrp,
+             netwr TYPE vbak-netwr,
+           END OF ty_vbak.
+    TYPES: BEGIN OF ty_vbak1,
+             vbeln TYPE vbak-vbeln,
+             vkorg TYPE vbak-vkorg,
+             vkgrp TYPE vbak-vkgrp,
+             netwr TYPE vbak-netwr,
+             date  TYPE datum,
+           END OF ty_vbak1.
+
+    DATA: lt_vbak        TYPE STANDARD TABLE OF ty_vbak,
+          lt_vbak_db     TYPE STANDARD TABLE OF ty_vbak1,
+          lt_range_vkorg TYPE RANGE OF vkorg.
+
+
+    SELECT
+     FROM vbak
+     FIELDS *
+     INTO TABLE @DATA(it_vbak)
+     UP TO 20 ROWS.
+    IF sy-subrc IS INITIAL.
+      SELECT
+        FROM vbap
+        FIELDS *
+        FOR ALL ENTRIES IN  @it_vbak
+        WHERE vbeln = @it_vbak-vbeln
+        INTO TABLE @DATA(it_vbap).
+*1.  For:-Get some of the columns from one internal table to new internal table NA01
+      lt_vbak = VALUE #( FOR ls_vbak IN it_vbak ( vbeln = ls_vbak-vbeln
+                                                  vkgrp = ls_vbak-vkgrp
+                                                  vkorg = ls_vbak-vkorg
+                                                  netwr = ls_vbak-netwr )  ).
+*2.  For:-Get some of lines based on some condition from one table to another table
+
+      lt_vbak  =  VALUE #( FOR ls_vbak IN it_vbak
+                           FOR ls_vbap IN it_vbap WHERE ( vbeln = ls_vbak-vbeln )
+                           (   vbeln = ls_vbak-vbeln
+                               posnr = ls_vbap-posnr
+                               vkgrp = ls_vbak-vkgrp
+                               vkorg = ls_vbak-vkorg
+                               netwr = ls_vbak-netwr  )
+                           ).
+
+      TYPES:BEGIN OF ty_tab,
+              number TYPE i,
+              squre  TYPE i,
+              cube   TYPE i,
+            END OF ty_tab.
+
+      DATA : it_tab TYPE STANDARD TABLE OF ty_tab.
+
+      it_tab = VALUE #( FOR i = 0 THEN i + 1  WHILE i LE 10
+                  ( number = i
+                    squre   =  i * i
+                    cube    = i * i * i ) ).
+
+*      lt_vbak = VALUE #( FOR ls_vbak IN it_vbak ( CORRESPONDING #( ls_vbak )  ) ).
+*
+*      lt_vbak_db  = VALUE #( FOR ls_vbak1 IN lt_vbak
+*                                     LET ls_base =  VALUE ty_vbak1( date = sy-datum )
+*                                     IN ( CORRESPONDING #( BASE ( ls_base ) ls_vbak1  ) )  ) .
+
+      cl_demo_output=>display(
+        EXPORTING
+          data = it_tab
+*         name =
+      ).
+
+
+    ENDIF.
+
+  ENDMETHOD.
+
+ENDCLASS.
+
+START-OF-SELECTION.
+  demo=>main( ).

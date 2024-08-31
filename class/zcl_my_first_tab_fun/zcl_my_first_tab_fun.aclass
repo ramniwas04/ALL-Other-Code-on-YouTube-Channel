@@ -1,0 +1,33 @@
+CLASS zcl_my_first_tab_fun DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+    INTERFACES if_amdp_marker_hdb.
+
+    CLASS-METHODS: get_so_header
+           FOR table FUNCTION Zddls_My_First_Cds_Table_Fun.
+
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+ENDCLASS.
+
+
+
+CLASS zcl_my_first_tab_fun IMPLEMENTATION.
+  METHOD get_so_header BY DATABASE FUNCTION
+                        FOR HDB
+                        LANGUAGE SQLSCRIPT
+                        OPTIONS READ-ONLY
+                        USING vbak.
+   it_vbak = SELECT
+       mandt as client,
+                 vbeln
+                 FROM vbak
+                 WHERE mandt = :client1;
+
+    RETURN :it_vbak;
+  ENDMETHOD.
+
+ENDCLASS.

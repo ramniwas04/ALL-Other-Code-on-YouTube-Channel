@@ -1,0 +1,75 @@
+*&---------------------------------------------------------------------*
+*& Report zr_opensql_15_client_handlin_t
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zr_opensql_15_client_handlin_t.
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.
+
+CLASS demo IMPLEMENTATION.
+
+  METHOD main.
+    SELECT
+     FROM vbak AS so
+     INNER JOIN vbap AS item
+     ON  so~mandt = item~mandt
+     AND so~vbeln = item~vbeln
+     CLIENT SPECIFIED
+     FIELDS so~vbeln, so~vkorg, so~vkgrp,
+            item~posnr, item~matnr
+     WHERE so~mandt = '800'
+     INTO TABLE @DATA(it_result)
+     .
+    IF sy-subrc IS INITIAL.
+      cl_demo_output=>write( it_result ).
+    ENDIF.
+
+    SELECT
+     FROM vbak AS so
+     INNER JOIN vbap AS item
+     ON so~vbeln = item~vbeln
+     USING CLIENT '800'
+     FIELDS so~vbeln, so~vkorg, so~vkgrp,
+             item~posnr, item~matnr
+     INTO TABLE @DATA(it_result1)
+
+     .
+    IF sy-subrc IS INITIAL.
+      cl_demo_output=>display( it_result ).
+    ENDIF.
+
+  ENDMETHOD.
+
+ENDCLASS.
+
+START-OF-SELECTION.
+  demo=>main( ).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*Automatic client handling switched off using the addition CLIENT SPECIFIED.
+*The following source code shows an Open SQL access to a database table where the current client is specified explicitly.
+*This makes a further explicit WHERE condition necessary.
+
+  .
+*Automatic client handling in Open SQL can be switched to a different client using the addition USING CLIENT
+*If Open SQL has to be used to access data in a different client,
+* USING CLIENT should be used instead of the addition CLIENT SPECIFIED, since all necessary conditions are set implicitly

@@ -1,0 +1,27 @@
+*&---------------------------------------------------------------------*
+*& Report zr_opensql_20_unioon_grp_by
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zr_opensql_24_union_2.
+
+DELETE FROM demo_expressions.
+INSERT demo_expressions FROM @( VALUE #( id = 'X' num1 = 111 ) ).
+
+SELECT id, num1
+       FROM demo_expressions
+  UNION
+      SELECT id, num1
+      FROM demo_expressions
+  INTO TABLE @DATA(it_result).
+
+  cl_demo_output=>write( it_result ).
+
+SELECT id, num1
+       FROM demo_expressions
+  UNION ALL
+      SELECT id, num1
+      FROM demo_expressions
+  INTO TABLE @DATA(it_result1).
+
+  cl_demo_output=>display( it_result1 ).

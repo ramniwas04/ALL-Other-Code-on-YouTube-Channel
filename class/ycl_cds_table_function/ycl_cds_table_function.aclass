@@ -1,0 +1,68 @@
+CLASS ycl_cds_table_function DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC .
+  PUBLIC SECTION.
+    INTERFACES if_amdp_marker_hdb.
+    CLASS-METHODS get_so_data
+        FOR TABLE FUNCTION yddls_table_function_01 .
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+ENDCLASS.
+
+
+
+CLASS ycl_cds_table_function IMPLEMENTATION.
+
+  METHOD get_so_data BY DATABASE FUNCTION
+                     FOR HDB
+                     LANGUAGE SQLSCRIPT
+                     OPTIONS READ-ONLY
+                     USING vbak.
+    RETURN  SELECT mandt AS client_element_name,
+                       vbeln AS vbeln
+                  FROM vbak ;
+*    return :it_vbeln;
+  ENDMETHOD.
+
+ENDCLASS.
+
+
+
+
+
+
+*
+
+*AMDP - Function Implementations
+*implementing an AMDP function as a database function
+*AMDP function = AMDP class Method with by database function
+
+*◾AMDP Table Functions
+*   •AMDP table functions for AMDP methods
+*   •AMDP Table Functions for CDS Table Functions
+**********************************************************************
+*1. CDS table function can only be declared in the public visibility section
+*   of a static AMDP class
+*2. The line type of the return value result of an AMDP function implementation
+*   for a client-dependent CDS table function does not contain a client field,
+*   even though this field must be declared in the element list.
+*3. An AMDP function implementation can only be associated with a single CDS table function.
+*4. When an AMDP function implementation is created for a CDS table function,
+*   it must already exist as an active function.
+*5. When a new CDS table function is activated, an empty AMDP table function is
+*   created in the database.
+*6. This function raises an exception if a non-AMDP access is performed.
+*7. When the CDS table function is accessed by the ABAP runtime environment
+*    for the first time (for example, using ABAP SQL),
+*     the AMDP function implementation implements the empty AMDP table
+*    function.
+*8. Other frameworks that evaluate CDS entities using their annotations, however,
+*    can also cause the AMDP table function to be implemented.
+*9. It is possible to access the table function in a native way only after the implementation.
+
+
+
+*◾AMDP Scalar Functions
+
+*/

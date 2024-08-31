@@ -1,0 +1,40 @@
+CLASS zddls_smple_08_tab_fun DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+    INTERFACES if_amdp_marker_hdb.
+    CLASS-METHODS emp_detail
+        FOR TABLE FUNCTION zddls_sample_08_cds_tab_fun.
+
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+ENDCLASS.
+
+
+
+CLASS zddls_smple_08_tab_fun IMPLEMENTATION.
+  METHOD emp_detail BY DATABASE FUNCTION
+                    FOR HDB
+                    LANGUAGE SQLSCRIPT
+                    USING
+                    zemployee_salary
+                    zemployee_ram.
+    it_result =  select zemployee_ram.client ,
+                        zemployee_ram.id,
+                        name  ,
+                        age,
+                        salary,
+                        curky
+                  from zemployee_ram
+                  inner join zemployee_salary
+                  on  zemployee_ram.client = zemployee_salary.client
+                  and zemployee_ram.id = zemployee_salary.id;
+
+  RETURN :it_result;
+
+
+  endmethod.
+
+ENDCLASS.

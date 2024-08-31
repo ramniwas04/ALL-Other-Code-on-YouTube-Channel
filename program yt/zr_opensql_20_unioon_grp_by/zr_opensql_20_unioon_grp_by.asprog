@@ -1,0 +1,72 @@
+*&---------------------------------------------------------------------*
+*& Report zr_opensql_20_unioon_grp_by
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zr_opensql_20_unioon_grp_by.
+*Use case only n select list
+*Use case in select list and grp by
+*Chaining operator
+*demo_sql_expr_with_group_by
+
+SELECT
+ FROM vbak AS so
+ INNER JOIN kna1 AS cust
+ ON so~kunnr = cust~kunnr
+ FIELDS so~kunnr AS cust_id,
+        cust~name1 AS customer,
+        so~waerk AS curre,
+        SUM( so~netwr ) AS tot_netprice,
+*        AVG( so~netwr ) AS net,
+*        MAX( so~netwr ) AS max,
+*        MIN( so~netwr  ) AS min,
+        COUNT( so~netwr ) AS count,
+      CASE
+         WHEN so~netwr > 1000 THEN 'Higher amount document'
+         WHEN ( so~netwr ge 500 AND so~netwr le 1000 ) THEN 'Medium amount'
+         ELSE  'Lower amount'
+         END AS amount_category
+ GROUP BY so~kunnr,so~waerk,
+         CASE
+         WHEN so~netwr > 1000 THEN 'Higher amount document'
+         WHEN ( so~netwr ge 500 AND so~netwr le 1000 ) THEN 'Medium amount'
+         ELSE  'Lower amount'
+         END,
+         cust~name1
+ HAVING SUM( so~netwr ) > 1000
+ INTO TABLE @DATA(it_result).
+IF sy-subrc IS INITIAL.
+  cl_demo_output=>display( it_result ).
+ENDIF.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*->The order of the SQL expressions / fields within
+*the comma-separated list is not important
+
+
+*->Columns not specified after GROUP BY
+*can only be specified after SELECT as the argument of
+*an aggregate function of an aggregate expression
+
+*->◾If GROUP BY is used, the statement SELECT bypasses table buffering.
+
+*->◾Using GROUP BY and aggregate functions ensures that
+*aggregates and groups are assembled by the database system,
+* not AS ABAP.
+*This can considerably reduce the volume of data that has to be transported
+*from the database to AS ABAP.
+**********************************************************************

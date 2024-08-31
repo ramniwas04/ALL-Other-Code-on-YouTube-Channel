@@ -1,0 +1,72 @@
+*&---------------------------------------------------------------------*
+*& Report z_filter_operator
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT z_filter_operator.
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.
+
+CLASS demo IMPLEMENTATION.
+
+  METHOD main.
+    TYPES: BEGIN OF ty_vbak,
+             vbeln TYPE vbak-vbeln,
+             vkorg TYPE vbak-vkorg,
+             netwr TYPE vbak-netwr,
+           END OF ty_vbak,
+           tt_vbak TYPE TABLE OF  ty_vbak WITH DEFAULT KEY,
+           BEGIN OF helper_type,
+             vkorg TYPE tvko-vkorg,
+             waers TYPE tvko-waers,
+           END OF helper_type.
+    DATA: lt_usd_org TYPE SORTED TABLE OF helper_type WITH UNIQUE KEY vkorg .
+    DATA: it_vbak TYPE STANDARD TABLE OF ty_vbak WITH NON-UNIQUE SORTED KEY org COMPONENTS vkorg.
+    DATA: it_vbak_sort TYPE SORTED TABLE OF ty_vbak WITH NON-UNIQUE KEY vkorg.
+*Below are some points to keep in mind when using the FILTER operator
+*-> The internal table on which FILTER operator is used must have at least one sorted key or one hash key used for access.
+*->The row type of main internal table and result internal table do not need to be identical
+*->The Boolean operators NOT, OR, and EQUIV cannot be used in the WHERE condition.
+*->Table filtering can also be performed using a table comprehension or a table reduction
+*  with an iteration expression for table iterations with FOR. The operator FILTER provides
+*  a shortened format for this special case and is more efficient to execute.
+*->A table filter constructs the result row by row. If the result contains almost all rows in the source table,
+*   this method can be slower than copying the source table and deleting the surplus rows from the target table.
+    SELECT
+     FROM vbak
+     FIELDS vbeln,vkorg,netwr
+     WHERE vkorg IN ( 'NA01','S100', 'VVSO' )
+     INTO TABLE @it_vbak_sort
+     UP TO 100 ROWS.
+    IF sy-subrc IS INITIAL.
+      SELECT
+          FROM tvko
+          FIELDS vkorg,waers
+          WHERE waers = ' '
+          INTO TABLE @lt_usd_org.
+      IF sy-subrc IS INITIAL.
+        DATA(lt_filtered_tab) = FILTER tt_vbak(  it_vbak_sort  IN lt_usd_org WHERE vkorg = vkorg ).
+      ENDIF.
+
+      cl_demo_output=>write( it_vbak_sort ).
+
+*      DATA(lt_vbak_s100) = FILTER tt_vbak( it_vbak_sort  WHERE vkorg = 'S100'   ).
+*      DATA(lt_vbak_other) = FILTER tt_vbak( it_vbak_sort EXCEPT WHERE vkorg = 'S100'   ).
+
+      cl_demo_output=>display( lt_filtered_tab ).
+
+*      DATA(lt_vbak_na01) = FILTER tt_vbak( it_vbak_sort USING KEY org WHERE vkorg = 'NA01'   ).
+
+    ENDIF.
+
+
+
+  ENDMETHOD.
+
+ENDCLASS.
+
+START-OF-SELECTION.
+  demo=>main( ).

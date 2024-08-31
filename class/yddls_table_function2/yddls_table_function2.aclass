@@ -1,0 +1,34 @@
+CLASS yddls_table_function2 DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+    INTERFACES if_amdp_marker_hdb.
+    CLASS-METHODS get_emp_detail
+        FOR TABLE FUNCTION yddls_table_function02.
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+ENDCLASS.
+
+
+
+CLASS yddls_table_function2 IMPLEMENTATION.
+  METHOD get_emp_detail BY DATABASE FUNCTION
+                        FOR HDB
+                         LANGUAGE SQLSCRIPT
+                         USING zemployee_ram
+                               zemployee_salary.
+    it_result = select  zemployee_ram.client as mandt ,
+                        zemployee_ram.id ,
+                        name,
+                        age,
+                        sal.salary
+                    from zemployee_ram
+                    inner join zemployee_salary as sal
+                    on zemployee_ram.client = sal.client
+                    and   zemployee_ram.id  = sal.id;
+         return  :it_result;
+  endmethod.
+
+ENDCLASS.

@@ -1,0 +1,79 @@
+CLASS zcl_amdp_cunsumption DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+    INTERFACES if_amdp_marker_hdb.
+
+    TYPES: tt_range_vbeln TYPE TABLE OF range_vbeln.
+
+    TYPES:BEGIN OF ty_vbak,
+            vbeln      TYPE vbak-vbeln,
+            zzusername TYPE vbak-zzusername,
+          END OF ty_vbak,
+          tt_vbak TYPE  TABLE OF ty_vbak.
+
+    CLASS-METHODS update_user
+      IMPORTING
+        VALUE(iv_mandt)       TYPE sy-mandt
+        VALUE(it_range_vbeln) TYPE  tt_range_vbeln
+      EXPORTING
+        VALUE(et_before)      TYPE tt_vbak
+        VALUE(et_after)       TYPE tt_vbak.
+
+
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+    CLASS-METHODS update_user_p
+      IMPORTING
+        VALUE(iv_mandt)       TYPE sy-mandt
+        VALUE(it_range_vbeln) TYPE  tt_range_vbeln
+      CHANGING
+        VALUE(et_before)      TYPE tt_vbak
+        VALUE(et_after)       TYPE tt_vbak.
+
+ENDCLASS.
+
+CLASS zcl_amdp_cunsumption IMPLEMENTATION.
+
+  METHOD update_user BY DATABASE PROCEDURE
+                      FOR HDB
+                      LANGUAGE SQLSCRIPT
+                      USING zcl_amdp_cunsumption=>update_user_p.
+
+
+    CALL "ZCL_AMDP_CUNSUMPTION=>UPDATE_USER_P"(
+             iv_mandt       => :iv_mandt,
+             it_range_vbeln => :it_range_vbeln,
+             et_before__in__  => :et_before,
+             et_after__in__   => :et_after,
+             et_before      => :et_before,
+             et_after       => :et_after
+         );
+
+  ENDMETHOD.
+
+  METHOD update_user_p BY DATABASE PROCEDURE
+                     FOR HDB
+                     LANGUAGE SQLSCRIPT
+                     USING vbak.
+
+    et_before  = select vbeln,zzusername
+                    from vbak
+                    WHERE mandt = :iv_mandt
+                    and vbeln in ( select low from :it_range_vbeln );
+
+
+    update vbak set zzusername = 'ABAPHANA'
+                     WHERE mandt = :iv_mandt
+                    and vbeln in ( select low from :it_range_vbeln );
+
+    et_after  = select vbeln,zzusername
+                    from vbak
+                    WHERE mandt = :iv_mandt
+                    and vbeln in ( select low from :it_range_vbeln );
+
+  ENDMETHOD.
+
+ENDCLASS.

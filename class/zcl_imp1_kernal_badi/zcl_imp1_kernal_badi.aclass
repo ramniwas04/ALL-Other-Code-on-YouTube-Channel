@@ -1,0 +1,23 @@
+CLASS zcl_imp1_kernal_badi DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+
+    INTERFACES if_badi_interface .
+    INTERFACES zif_sales_order_info .
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+ENDCLASS.
+
+
+
+CLASS zcl_imp1_kernal_badi IMPLEMENTATION.
+  METHOD zif_sales_order_info~modify_header.
+    LOOP AT it_vbak ASSIGNING FIELD-SYMBOL(<ls_vbak>).
+       <ls_vbak>-zzdate = sy-datum + 1.
+       <ls_vbak>-zzusername = 'Krishna'.
+    ENDLOOP.
+  ENDMETHOD.
+ENDCLASS.

@@ -1,0 +1,38 @@
+*&---------------------------------------------------------------------*
+*& Report zr_opensql_02_literals_t
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zr_opensql_02_literals_t.
+
+DATA: lv_matnr TYPE matnr.
+
+SELECTION-SCREEN BEGIN OF BLOCK b1 WITH FRAME TITLE TEXT-001.
+  SELECT-OPTIONS: s_matnr FOR lv_matnr.
+SELECTION-SCREEN END OF BLOCK b1.
+
+*SFDC*
+DATA: lr_matnr  TYPE RANGE OF matnr,
+      lt_matnr2 TYPE RANGE OF matnr,
+      ls_matnr  LIKE LINE OF lr_matnr.
+
+ls_matnr-sign = 'I'.
+ls_matnr-option = 'CP'.
+ls_matnr-low = 'SFDC*'.
+APPEND ls_matnr TO lr_matnr.
+
+SELECT 'I' AS sign,
+       `EQ` AS option,
+        1 as number,
+       matnr AS low,
+       ' '  AS high
+ FROM mara
+ INTO TABLE @data(lt_matnr3)
+ UP TO 10 ROWS
+ WHERE ( matnr IN @s_matnr AND matnr IN @lr_matnr ).
+IF sy-subrc IS INITIAL.
+*  cl_demo_output=>write( lt_matnr2 ).
+ENDIF.
+
+
+cl_demo_output=>display( lt_matnr3 ).

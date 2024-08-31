@@ -1,0 +1,54 @@
+*&---------------------------------------------------------------------*
+*& Report z_let_expression
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT z_let_expression.
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.
+
+CLASS demo IMPLEMENTATION.
+
+  METHOD main.
+*let_exp - LET ... IN
+
+ TYPES text TYPE STANDARD TABLE OF string WITH EMPTY KEY.
+
+    data(lv_value) =      VALUE text(
+                   LET it = `be` IN
+                   ( |To { it } is to do|          )
+                   ( |To { it }, or not to { it }| )
+                   ( |To do is to { it }|          )
+                   ( |Do { it } do { it } do|      ) ).
+
+    cl_demo_output=>new( )->write( lv_value )->display( ).
+
+*    SELECT SINGLE *
+*    FROM vbak
+*    INTO  @DATA(ls_vbak)
+*    WHERE vbeln = '0000000011'.
+*
+*
+*
+*    DATA(lv_netprice_disc) = CONV string( LET  disc = 5
+*                                               sep  = '-'
+*                                               cal_disc = ls_vbak-netwr * disc
+*                                           IN  ls_vbak-netwr && sep && cal_disc   ).
+*
+*    cl_demo_output=>display(
+*      EXPORTING
+*        data = lv_netprice_disc
+**        name =
+*    ).
+
+
+
+  ENDMETHOD.
+
+ENDCLASS.
+
+START-OF-SELECTION.
+  demo=>main( ).

@@ -1,0 +1,218 @@
+*&---------------------------------------------------------------------*
+*& Report z_move_corresponding
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT z_move_corresponding.
+*MOVE-CORRESPONDING with deep structure and without using EXPANDING NESTED TABLES
+*MOVE-CORRESPONDING with deep structure and using EXPANDING NESTED TABLES
+*MOVE-CORRESPONDING with Nested table without using EXPANDING NESTED TABLES
+*MOVE-CORRESPONDING with Nested table with using EXPANDING NESTED TABLES
+*MOVE-CORRESPONDING with Nested table with using  KEEPING TARGET LINES
+
+**Example MOVE-CORRESPONDING for Structures                DEMO_MOVE_CORRESPONDING_STRUCT
+**Example MOVE-CORRESPONDING for Internal Tables           DEMO_MOVE_CORRESPONDING_STRUCT
+**Example Component Operator for Structures                DEMO_CORRESPONDING_STRUCT
+**Example Component Operator for Internal Tables           DEMO_CORRESPONDING_ITAB
+
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+
+  PRIVATE SECTION.
+    TYPES:
+      BEGIN OF ty_line_struct1,
+        col1 TYPE char3,
+        col2 TYPE char3,
+      END OF ty_line_struct1,
+
+      BEGIN OF ty_line_struct2,
+        col2 TYPE char3,
+        col3 TYPE char3,
+      END OF ty_line_struct2,
+
+      BEGIN OF ty_struct1,
+        col1   TYPE                   char3,                        "elementary components,
+        col2   TYPE                   char3,
+        it_tab TYPE STANDARD TABLE OF ty_line_struct1 WITH EMPTY KEY, "tabular component
+      END OF ty_struct1,
+
+      BEGIN OF ty_struct2,
+        col2   TYPE                   char3,
+        it_tab TYPE STANDARD TABLE OF ty_line_struct2 WITH EMPTY KEY,
+        col4   TYPE                   char3,
+      END OF ty_struct2.
+
+    CLASS-DATA:
+      it_tab1 TYPE STANDARD TABLE OF ty_struct1 WITH EMPTY KEY,
+      it_tab2 TYPE STANDARD TABLE OF ty_struct2 WITH EMPTY KEY,
+
+      lr_out  TYPE REF TO if_demo_output.
+
+    CLASS-METHODS:
+      display_itab1,
+      display_itab2.
+ENDCLASS.
+
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+*Example MOVE-CORRESPONDING for Structures
+*Example MOVE-CORRESPONDING for Internal Tables
+*Example Component Operator for Structures
+*Example Component Operator for Internal Tables
+*Example Component Operator for Table Expression
+
+    lr_out = cl_demo_output=>new( ).
+
+    it_tab1 = VALUE #( (
+                     col1 = 'a1'
+                     col2 = 'a2'
+                     it_tab = VALUE #( ( col1 = 'a11'  col2 = 'a12' )
+                                       ( col1 = 'a21'  col2 = 'a22' ) ) )
+                       (
+                     col1 = 'b1'
+                     col2 = 'b2'
+                     it_tab = VALUE #( ( col1 = 'b11'  col2 = 'b12' )
+                                       ( col1 = 'b21'  col2 = 'b22' ) ) )                                       ).
+
+    it_tab2 = VALUE #( (
+                         col2 = 'x1'
+                         it_tab = VALUE #( ( col2 = 'x11'  col3 = 'x12' )
+                                           ( col2 = 'x21'  col3 = 'x22' )
+                                           ( col2 = 'x31'  col3 = 'x32' ) )
+                         col4 = 'x4'  )
+                        (
+                         col2 = 'y1'
+                         it_tab = VALUE #( ( col2 = 'y11'  col3 = 'y12' )
+                                           ( col2 = 'y21'  col3 = 'y22' )
+                                           ( col2 = 'y31'  col3 = 'y32' ) )
+                         col4 = 'y4'  )
+                          ).
+    DATA(it_backup)  = it_tab2.
+
+    lr_out->begin_section( `itab1` ).
+    display_itab1( ).
+
+    lr_out->next_section( `itab2` ).
+    display_itab2( ).
+
+    it_tab2 = it_backup.
+    lr_out->next_section(
+      `it_tab2 = CORRESPONDING #( BASE ( it_tab2 ) it_tab1 )` ).
+
+    it_tab2 = CORRESPONDING #( DEEP BASE ( it_tab2 ) it_tab1 ).
+    display_itab2( ).
+**********************************************************************
+    it_tab2 = it_backup.
+    lr_out->next_section(
+      `MOVE-CORRESPONDING it_tab1 TO it_tab2 KEEPING TARGET LINES` ).
+
+    MOVE-CORRESPONDING it_tab1 TO it_tab2 EXPANDING NESTED TABLES KEEPING TARGET LINES .
+    display_itab2( ).
+
+*                                        .
+*
+*    display_itab2( ).
+*
+*
+*    it_tab2 = it_backup.
+*    lr_out->begin_section(
+*      `MOVE-CORRESPONDING` ).
+**
+*    MOVE-CORRESPONDING it_tab1 TO it_tab2.
+*
+*    display_itab2( ).
+
+
+*    it_tab2 = it_backup.
+*    lr_out->next_section(
+*      `MOVE-CORRESPONDING KEEPING TARGET LINES` ).
+*
+*    MOVE-CORRESPONDING it_tab1 TO it_tab2 KEEPING TARGET LINES.
+*
+*    display_itab2( ).
+
+
+
+*    lr_out->next_section(
+*      `MOVE-CORRESPONDING EXPANDING NESTED TABLES` ).
+*
+*    MOVE-CORRESPONDING it_tab1 TO it_tab2 EXPANDING NESTED TABLES.
+
+*    display_itab2( ).
+    lr_out->display( ).
+  ENDMETHOD.
+  METHOD display_itab1.
+
+    DATA:
+      BEGIN OF ts_dispaly_table1,
+        col1        TYPE char3,
+        col2        TYPE char3,
+        it_tab_col1 TYPE char3,
+        it_tab_col2 TYPE char3,
+      END OF ts_dispaly_table1.
+    DATA it_table1 LIKE STANDARD TABLE OF ts_dispaly_table1 WITH EMPTY KEY.
+
+*    ls_struct1 = VALUE #(
+*                     col1 = 'a1'
+*                     col2 = 'a2'
+*                     it_tab = VALUE #( ( col1 = 'a11'  col2 = 'a12' )
+*                                       ( col1 = 'a21'  col2 = 'a22' ) ) ).
+    LOOP AT it_tab1 ASSIGNING FIELD-SYMBOL(<ls_tab1>).
+      ts_dispaly_table1-col1 = <ls_tab1>-col1.
+      ts_dispaly_table1-col2 = <ls_tab1>-col2.
+      LOOP AT <ls_tab1>-it_tab ASSIGNING FIELD-SYMBOL(<it_tab>).
+        ts_dispaly_table1-it_tab_col1 = <it_tab>-col1.
+        ts_dispaly_table1-it_tab_col2 = <it_tab>-col2.
+        IF sy-tabix > 1.
+          CLEAR ts_dispaly_table1-col1.
+          CLEAR ts_dispaly_table1-col2.
+        ENDIF.
+        APPEND ts_dispaly_table1 TO it_table1.
+      ENDLOOP.
+
+    ENDLOOP.
+
+
+
+    lr_out->write( it_table1 ).
+  ENDMETHOD.
+
+  METHOD display_itab2.
+    DATA:
+      BEGIN OF ts_dispaly_table2,
+        col2        TYPE char3,
+        it_tab_col2 TYPE char3,
+        it_tab_col3 TYPE char3,
+        col4        TYPE char3,
+      END OF ts_dispaly_table2.
+
+    DATA it_dispaly_table2 LIKE STANDARD TABLE OF ts_dispaly_table2 WITH EMPTY KEY.
+
+*    ls_struct2 = VALUE #(
+*                         col2 = 'x1'
+*                         it_tab = VALUE #( ( col2 = 'x11'  col3 = 'x12' )
+*                                           ( col2 = 'x21'  col3 = 'x22' )
+*                                           ( col2 = 'x31'  col3 = 'x32' ) )
+*                         col4 = 'x4'  ).
+    LOOP AT it_tab2 ASSIGNING FIELD-SYMBOL(<ls_tab2>).
+      ts_dispaly_table2-col2 = <ls_tab2>-col2.
+      ts_dispaly_table2-col4 = <ls_tab2>-col4.
+      LOOP AT <ls_tab2>-it_tab ASSIGNING FIELD-SYMBOL(<col3>).
+        ts_dispaly_table2-it_tab_col2 = <col3>-col2.
+        ts_dispaly_table2-it_tab_col3 = <col3>-col3.
+        IF sy-tabix > 1.
+          CLEAR ts_dispaly_table2-col2.
+          CLEAR ts_dispaly_table2-col4.
+        ENDIF.
+        APPEND ts_dispaly_table2 TO it_dispaly_table2.
+      ENDLOOP.
+    ENDLOOP.
+
+    lr_out->write( it_dispaly_table2 ).
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  demo=>main( ).

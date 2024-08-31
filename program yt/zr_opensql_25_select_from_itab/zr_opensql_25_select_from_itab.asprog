@@ -1,0 +1,44 @@
+*&---------------------------------------------------------------------*
+*& Report zr_opensql_25_select_from_itab
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zr_opensql_25_select_from_itab.
+
+
+*There are two different cases here:
+
+
+
+SELECT
+FROM vbak AS a
+INNER JOIN vbap AS b
+ON a~vbeln = b~vbeln
+FIELDS a~vbeln,
+       a~ernam,
+       sum( b~netpr ) as add,
+       avg( b~netpr ) as average,
+       count( b~netpr ) as price
+       group by a~vbeln, a~ernam
+INTO TABLE @DATA(lt_final).
+if sy-subrc is initial.
+ cl_demo_output=>display( lt_final ).
+endif.
+
+
+
+
+
+
+
+
+
+
+*FOR ALL ENTRIES cannot be combined with the SQL Expressions like aggregate expressions.
+*GROUP BY clause is not allowed to use with FOR ALL ENTRIES statement.
+
+*The select statement must be prefixed with the @ character
+*Only one internal table as a source can be specified in the select statement
+*There must have an alias using AS Statement
+*It should not have deep structures or contains type string
+*It should not contain any obsolete data type

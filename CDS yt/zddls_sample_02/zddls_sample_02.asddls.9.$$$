@@ -1,0 +1,50 @@
+@AbapCatalog.viewEnhancementCategory: [#NONE]
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Define view entity'
+@Metadata.ignorePropagatedAnnotations: true
+@ObjectModel.usageType:{
+    serviceQuality: #X,
+    sizeCategory: #S,
+    dataClass: #MIXED
+}
+
+define view entity ZDDLS_SAMPLE_02 
+as select from vbak {
+     key    kunnr as cust,
+            vbeln as so
+}
+
+// CL_DD_DDL_ANNOTATION_SERVICE #B: 
+
+/*
+-> Annotation devided in three parts
+   1. Metadata extension 
+   2. Direct Annotation (GET_DIRECT_ANNOS_ )
+   3. indirect Annotation ( Derived and inheritate ) 
+*/   
+   
+   
+
+//#A: The CDS view entity can be used for high volume transactions or for background transactions.
+//      Max 3 DB table ( No Mixed data category)   (No aggregation)
+//      Single line reading with full key < 1ms for some fields < 2ms * fields
+
+//#B: The CDS view entity can be used for transactions or for background transactions.
+//      Max 5 DB table ( No Mixed data category)  (No aggregation)
+//      Single line reading with full key < 2ms for some fields < 5ms * fields
+ 
+//#C: The CDS view entity can be used to query individual objects in transactions.
+//      Max 15 DB table ( No Mixed data category)   (No aggregation)
+//      Single line reading with full key < 10ms for some fields < 20ms * fields
+
+ 
+// #D:The CDS view entity can be used for analytical queries. 
+//      Max 100 DB table
+
+
+// #X:  The CDS view entity is designed for special application cases, such as data migration. 
+//      More than 100 DB table
+
+ 
+// #P:The CDS view entity is used to structure hierarchies of CDS entities and must not be used outside of such a hierarchy.
+//     Not for business applications.

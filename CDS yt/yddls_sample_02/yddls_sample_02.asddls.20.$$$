@@ -1,0 +1,24 @@
+@AbapCatalog.viewEnhancementCategory: [#NONE]
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: ' CDS'
+@Metadata.ignorePropagatedAnnotations: true
+@ObjectModel.usageType:{
+    serviceQuality: #X,
+    sizeCategory: #S,
+    dataClass: #MIXED
+}
+define view entity Yddls_Sample_02
+  as select from vbak as _header
+  association [0..*] to vbap as _item on _header.vbeln = _item.vbeln
+{
+  key vbeln         as so,
+      _header.kunnr as customer,
+      @Semantics.amount.currencyCode : 'curr    '
+      @DefaultAggregation: #SUM
+      _header.netwr as net_amt,
+      _header.waerk as curr,
+      _item.posnr,
+      @Semantics.amount.currencyCode : 'curr'
+      @DefaultAggregation: #SUM
+      _item.netwr   as net_amt_line
+}

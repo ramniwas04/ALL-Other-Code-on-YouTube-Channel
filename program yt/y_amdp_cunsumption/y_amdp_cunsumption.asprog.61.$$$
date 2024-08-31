@@ -1,0 +1,95 @@
+*&---------------------------------------------------------------------*
+*& Report y_amdp_cunsumption
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT y_amdp_cunsumption.
+DATA: lv_vbaln TYPE vbak-vbeln,
+      lv_posnr TYPE vbap-posnr,
+      lv_kunnr TYPE vbak-kunnr,
+      lv_matnr TYPE vbap-matnr.
+SELECTION-SCREEN BEGIN OF BLOCK b1 WITH FRAME TITLE TEXT-001.
+  SELECT-OPTIONS: s_vbeln FOR lv_vbaln,
+                  s_posnr FOR lv_posnr,
+                  s_kunnr FOR lv_kunnr,
+                  s_matnr FOR lv_matnr.
+SELECTION-SCREEN END OF BLOCK b1.
+**********************************************************************
+TRY.
+    cl_shdb_seltab=>combine_seltabs(
+      EXPORTING
+        it_named_seltabs = VALUE #(
+                      ( name = 'VBELN'  dref = REF #( s_vbeln[] ) )
+                      ( name = 'POSNR'  dref = REF #( s_posnr[] ) )
+                      ( name = 'KUNNR'  dref = REF #( s_kunnr[] ) )
+                      ( name = 'MATNR'  dref = REF #( s_matnr[] ) )
+
+                       )
+*        iv_client_field  = 'MANDT'
+      RECEIVING
+        rv_where         =  DATA(lv_where)
+    ).
+  CATCH cx_shdb_exception INTO DATA(lr_e).
+    MESSAGE lr_e->get_text( ) TYPE 'E'.
+ENDTRY.
+DATA(it_out) = ycl_amdp_introduction=>handle_select_option( iv_where = lv_where  ).
+
+
+*ycl_amdp_introduction=>handle_select_option(
+*  EXPORTING
+*    iv_where = lv_where
+*  IMPORTING
+*    it_out   = DATA(it_out)
+*).
+**********************************************************************
+
+
+cl_demo_output=>display( it_out ).
+
+*ycl_amdp_introduction=>update_so_header(
+*  EXPORTING
+*   iv_mandt  = sy-mandt
+*  CHANGING
+*   it_vbeln  = s_vbeln[]
+*).
+
+
+
+**********************************************************************
+*PARAMETER pnumber TYPE i DEFAULT 10.
+*
+*DATA: lv_number TYPE  i VALUE 15.
+
+**********************************************************************
+*TYPES:
+*  BEGIN OF session_variables,
+*    client     TYPE sy-mandt,
+*    cds_client TYPE sy-mandt,
+*    uname      TYPE sy-uname,
+*    langu      TYPE sy-langu,
+*    datum      TYPE sy-datum,
+*  END OF session_variables .
+*DATA: wa_session_variables TYPE session_variables.
+*ycl_amdp_introduction=>get_session_variables_amdp(
+*  EXPORTING mandt = '800'
+*  IMPORTING
+*    clnt     = wa_session_variables-client
+*    cds_clnt = wa_session_variables-cds_client
+*    unam     = wa_session_variables-uname
+*    lang     = wa_session_variables-langu
+*    date     = wa_session_variables-datum
+*).
+*cl_demo_output=>write( wa_session_variables ) .
+*CATCH cx_amdp_error.
+**********************************************************************
+* set the value of the procedure input parameter
+
+* call  AMDP methods
+*ycl_amdp_introduction=>get_top_and_flop(
+*                EXPORTING iv_number = lv_number
+*                          iv_client = sy-mandt
+*                IMPORTING et_top = DATA(lt_top)
+*                          et_flop = DATA(lt_flop) ).
+*
+*cl_demo_output=>write( lt_top ) .
+*cl_demo_output=>display( lt_flop ) .

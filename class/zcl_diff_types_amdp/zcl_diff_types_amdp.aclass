@@ -1,0 +1,139 @@
+CLASS zcl_diff_types_amdp DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC .
+  PUBLIC SECTION.
+    INTERFACES if_amdp_marker_hdb.
+    TYPES:
+      BEGIN OF ty_scarr_spfli,
+        carrname TYPE scarr-carrname,
+        connid   TYPE spfli-connid,
+        cityfrom TYPE spfli-cityfrom,
+        cityto   TYPE spfli-cityto,
+      END OF ty_scarr_spfli,
+      tt_scarr_spfli TYPE STANDARD TABLE OF ty_scarr_spfli WITH EMPTY KEY,
+      BEGIN OF ty_spfli,
+        carrid   TYPE spfli-carrid,
+        connid   TYPE spfli-connid,
+        cityfrom TYPE spfli-cityfrom,
+        cityto   TYPE spfli-cityto,
+        fltime   TYPE spfli-fltime,
+      END OF ty_spfli,
+      tt_spfli TYPE STANDARD TABLE OF ty_spfli WITH EMPTY KEY.
+
+
+*Try to call in normal program directly
+*Create a procedure and call inside that procedure this table function
+    CLASS-METHODS get_scarr_spfli_pro
+      IMPORTING
+        VALUE(iv_mandt)       TYPE sy-mandt
+        VALUE(iv_carrid)      TYPE spfli-carrid
+      EXPORTING
+        VALUE(et_scarr_spfli) TYPE tt_scarr_spfli.
+*Create a scalar table function to get max flight time
+    CLASS-METHODS get_max_fltime_scalar_fun
+      IMPORTING
+        VALUE(iv_mandt)       TYPE sy-mandt
+        VALUE(iv_carrid)      TYPE spfli-carrid
+      RETURNING
+        VALUE(et_fl_max_time) TYPE spfli-fltime.
+
+*Consume Scalar table function inside procedure
+    CLASS-METHODS get_flight_detail_maxfltime
+      IMPORTING
+        VALUE(iv_mandt)       TYPE sy-mandt
+        VALUE(iv_carrid)      TYPE spfli-carrid
+      EXPORTING
+        VALUE(et_scarr_spfli) TYPE tt_spfli..
+
+
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+*Create AMDP table function to get scarr_spfli data
+    CLASS-METHODS get_scarr_spfli_tab_fun
+      IMPORTING
+        VALUE(iv_mandt)       TYPE sy-mandt
+        VALUE(iv_carrid)      TYPE spfli-carrid
+      RETURNING
+        VALUE(et_scarr_spfli) TYPE tt_scarr_spfli.
+ENDCLASS.
+
+CLASS zcl_diff_types_amdp IMPLEMENTATION.
+  METHOD get_scarr_spfli_tab_fun BY DATABASE FUNCTION
+                                 FOR HDB
+                                 LANGUAGE SQLSCRIPT
+                                 OPTIONS READ-ONLY
+                                 USING spfli scarr.
+    RETURN   SELECT sc.carrname,
+              sp.connid ,
+              sp.cityfrom,
+              sp.cityto
+         from spfli as sp
+         inner join scarr as sc
+         on sc.mandt  = sp.mandt
+         and sc.carrid = sp.carrid
+         where sc.mandt = :iv_mandt
+         AND   sc.carrid = :iv_carrid
+         order by connid,cityfrom,cityto;
+  ENDMETHOD.
+
+  METHOD get_scarr_spfli_pro BY DATABASE PROCEDURE
+                             FOR HDB
+                            LANGUAGE SQLSCRIPT
+                            USING zcl_diff_types_amdp=>get_scarr_spfli_tab_fun.
+    et_scarr_spfli=    SELECT *
+                            FROM  "ZCL_DIFF_TYPES_AMDP=>GET_SCARR_SPFLI_TAB_FUN" (
+                             iv_mandt       => :iv_mandt,
+                             iv_carrid      =>  :iv_carrid );
+
+
+  ENDMETHOD.
+
+  METHOD get_max_fltime_scalar_fun BY DATABASE FUNCTION
+                                    FOR HDB
+                                    LANGUAGE SQLSCRIPT
+                                    OPTIONS READ-ONLY
+                                    USING spfli.
+    SELECT MAX ( fltime )
+          INTO et_fl_max_time
+          FROM spfli
+          WHERE mandt = :iv_mandt
+           AND  carrid = :iv_carrid;
+
+  ENDMETHOD.
+
+  METHOD get_flight_detail_maxfltime BY DATABASE PROCEDURE
+                                      FOR HDB
+                                      LANGUAGE SQLSCRIPT
+                                      USING spfli
+                                      zcl_diff_types_amdp=>get_max_fltime_scalar_fun.
+
+    et_scarr_spfli =   select  carrid,
+                                    connid  ,
+                                    cityfrom,
+                                    cityto  ,
+                                    fltime
+                       from  spfli
+                       WHERE  mandt = :iv_mandt
+                       and fltime = "ZCL_DIFF_TYPES_AMDP=>GET_MAX_FLTIME_SCALAR_FUN" (
+                                       iv_mandt => :iv_mandt,
+                                       iv_carrid => :iv_carrid );
+
+
+
+  ENDMETHOD.
+
+ENDCLASS.
+
+
+
+
+
+
+
+
+*Call directly AMDP table function first
+*Call  AMDP table function trough another public function\
+*AMDP table function for CDS call
+*AMDP scalar function called from ABAP Directly
+*AMDP scalar function called through database procedure

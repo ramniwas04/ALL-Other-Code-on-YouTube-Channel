@@ -1,0 +1,39 @@
+*&---------------------------------------------------------------------*
+*& Report zr_opensql_20_unioon_grp_by
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zr_opensql_22_union_1.
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.
+
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+
+    DATA carrid TYPE sflight-carrid VALUE 'AA'.
+    cl_demo_input=>request( CHANGING field = carrid ).
+
+    SELECT ' ' AS mark,
+           carrid, connid, fldate, seatsocc
+            FROM sflight
+            WHERE carrid = @( to_upper( carrid ) )
+    UNION
+    SELECT 'TOTAL' AS mark,
+           carrid, connid,
+           CAST( '00000000' AS DATS ) AS fldate,
+           SUM( seatsocc ) AS seatsocc
+      FROM sflight
+      WHERE carrid = @( to_upper( carrid ) )
+      GROUP BY carrid, connid
+      ORDER BY carrid, connid, mark, fldate, seatsocc
+    INTO TABLE @DATA(it_result).
+
+    cl_demo_output=>display( it_result ).
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  demo=>main( ).

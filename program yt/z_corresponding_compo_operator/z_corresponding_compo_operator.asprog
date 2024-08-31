@@ -1,0 +1,182 @@
+*&---------------------------------------------------------------------*
+*& Report z_corresponding_compo_operator
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT z_corresponding_compo_operator.
+**Example Component Operator for Structures                DEMO_CORRESPONDING_STRUCT
+**Example Component Operator for Internal Tables           DEMO_CORRESPONDING_ITAB
+
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+
+  PRIVATE SECTION.
+    TYPES:
+      BEGIN OF ty_line_struct1,
+        col1 TYPE char3,
+        col2 TYPE char3,
+      END OF ty_line_struct1,
+
+      BEGIN OF ty_line_struct2,
+        col2 TYPE char3,
+        col3 TYPE char3,
+      END OF ty_line_struct2,
+
+      BEGIN OF ty_struct1,
+        col1   TYPE                   char3,                        "elementary components,
+        col2   TYPE                   char3,
+        it_tab TYPE STANDARD TABLE OF ty_line_struct1 WITH EMPTY KEY, "tabular component
+      END OF ty_struct1,
+
+      BEGIN OF ty_struct2,
+        col2   TYPE                   char3,
+        it_tab TYPE STANDARD TABLE OF ty_line_struct2 WITH EMPTY KEY,
+        col4   TYPE                   char3,
+      END OF ty_struct2.
+
+    CLASS-DATA:
+      ls_struct1 TYPE  ty_struct1,
+      ls_struct2 TYPE  ty_struct2,
+
+      lr_out     TYPE REF TO if_demo_output.
+
+    CLASS-METHODS:
+      display_struct1,
+      display_struct2.
+ENDCLASS.
+
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+*Example MOVE-CORRESPONDING for Structures
+*Example MOVE-CORRESPONDING for Internal Tables
+*Example Component Operator for Structures
+*Example Component Operator for Internal Tables
+*Example Component Operator for Table Expression
+
+    lr_out = cl_demo_output=>new( ).
+
+    ls_struct1 = VALUE #(
+                     col1 = 'a1'
+                     col2 = 'a2'
+                     it_tab = VALUE #( ( col1 = 'a11'  col2 = 'a12' )
+                                       ( col1 = 'a21'  col2 = 'a22' ) )  ).
+
+    ls_struct2 = VALUE #(
+                         col2 = 'x1'
+                         it_tab = VALUE #( ( col2 = 'x11'  col3 = 'x12' )
+                                           ( col2 = 'x21'  col3 = 'x22' )
+                                           ( col2 = 'x31'  col3 = 'x32' ) )
+                         col4 = 'x4'  ).
+
+    DATA(ls_backup)  = ls_struct2.
+
+    lr_out->begin_section( `struct1` ).
+    display_struct1( ).
+
+    lr_out->next_section( `struct2` ).
+    display_struct2( ).
+**********************************************************************
+*    ls_struct2 = ls_backup.
+*    lr_out->begin_section(
+*        `ls_struct2 = CORRESPONDING #( ls_struct1 )` ).
+*
+*    ls_struct2 = CORRESPONDING #( ls_struct1 ).
+*    display_struct2( ).
+**********************************************************************
+    ls_struct2 = ls_backup.
+    lr_out->begin_section(
+        `MOVE-CORRESPONDING EXPANDING NESTED TABLES` ).
+
+    MOVE-CORRESPONDING ls_struct1 TO ls_struct2 EXPANDING NESTED TABLES.
+    display_struct2( ).
+**********************************************************************
+*    ls_struct2 = ls_backup.
+*    lr_out->begin_section(
+*        `ls_struct2 = CORRESPONDING #( BASE ( ls_struct2 ) ls_struct1 )` ).
+*
+*    ls_struct2 = CORRESPONDING #( BASE ( ls_struct2 ) ls_struct1 ).
+*    display_struct2( ).
+**********************************************************************
+      ls_struct2 = ls_backup.
+    lr_out->begin_section(
+        `ls_struct2 = CORRESPONDING #( DEEP BASE ( ls_struct2 ) ls_struct1 )` ).
+
+    ls_struct2 = CORRESPONDING #( DEEP BASE ( ls_struct2 ) ls_struct1 ).
+    display_struct2( ).
+
+
+    lr_out->display( ).
+  ENDMETHOD.
+  METHOD display_struct1.
+
+    DATA:
+      BEGIN OF ts_dispaly_table1,
+        col1        TYPE char3,
+        col2        TYPE char3,
+        it_tab_col1 TYPE char3,
+        it_tab_col2 TYPE char3,
+      END OF ts_dispaly_table1.
+    DATA it_table1 LIKE STANDARD TABLE OF ts_dispaly_table1 WITH EMPTY KEY.
+
+*    ls_struct1 = VALUE #(
+*                     col1 = 'a1'
+*                     col2 = 'a2'
+*                     it_tab = VALUE #( ( col1 = 'a11'  col2 = 'a12' )
+*                                       ( col1 = 'a21'  col2 = 'a22' ) ) ).
+
+    ts_dispaly_table1-col1 = ls_struct1-col1.
+    ts_dispaly_table1-col2 = ls_struct1-col2.
+    LOOP AT ls_struct1-it_tab ASSIGNING FIELD-SYMBOL(<it_tab>).
+      ts_dispaly_table1-it_tab_col1 = <it_tab>-col1.
+      ts_dispaly_table1-it_tab_col2 = <it_tab>-col2.
+      IF sy-tabix > 1.
+        CLEAR ts_dispaly_table1-col1.
+        CLEAR ts_dispaly_table1-col2.
+      ENDIF.
+      APPEND ts_dispaly_table1 TO it_table1.
+    ENDLOOP.
+
+
+
+
+    lr_out->write( it_table1 ).
+  ENDMETHOD.
+
+  METHOD display_struct2.
+    DATA:
+      BEGIN OF ts_dispaly_table2,
+        col2        TYPE char3,
+        it_tab_col2 TYPE char3,
+        it_tab_col3 TYPE char3,
+        col4        TYPE char3,
+      END OF ts_dispaly_table2.
+
+    DATA it_dispaly_table2 LIKE STANDARD TABLE OF ts_dispaly_table2 WITH EMPTY KEY.
+
+*    ls_struct2 = VALUE #(
+*                         col2 = 'x1'
+*                         it_tab = VALUE #( ( col2 = 'x11'  col3 = 'x12' )
+*                                           ( col2 = 'x21'  col3 = 'x22' )
+*                                           ( col2 = 'x31'  col3 = 'x32' ) )
+*                         col4 = 'x4'  ).
+
+    ts_dispaly_table2-col2 = ls_struct2-col2.
+    ts_dispaly_table2-col4 = ls_struct2-col4.
+    LOOP AT ls_struct2-it_tab ASSIGNING FIELD-SYMBOL(<col3>).
+      ts_dispaly_table2-it_tab_col2 = <col3>-col2.
+      ts_dispaly_table2-it_tab_col3 = <col3>-col3.
+      IF sy-tabix > 1.
+        CLEAR ts_dispaly_table2-col2.
+        CLEAR ts_dispaly_table2-col4.
+      ENDIF.
+      APPEND ts_dispaly_table2 TO it_dispaly_table2.
+    ENDLOOP.
+
+    lr_out->write( it_dispaly_table2 ).
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  demo=>main( ).

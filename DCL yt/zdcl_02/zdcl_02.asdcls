@@ -1,0 +1,20 @@
+@EndUserText.label: 'ZDCL_02'
+@MappingRole: true
+define role ZDCL_02 {
+    grant
+        select
+            on
+                ZDDLS_SAMPLE_02
+                    where
+//                      $session.user = aspect user
+//                     and 
+                      $parameters.p_date = '20220511'
+                      and 
+                        'GABAP3' = aspect user
+//                    (vbtyp,sales__org) = aspect ZDCL_ACCESS_POLICY_09
+//                        sales__org is not initial 
+//                        and
+//                        ernam = aspect user
+//                        or entity_element_2 = aspect user;
+     ;                   
+}

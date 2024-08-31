@@ -1,0 +1,27 @@
+*&---------------------------------------------------------------------*
+*& Report z_open_vs_native_sql
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT z_open_vs_native_sql.
+
+SELECT
+ FROM vbak
+ FIELDS vbeln,vkorg
+ INTO TABLE @DATA(lt_vbak)
+ up to 2 ROWS.
+IF sy-subrc IS INITIAL.
+  SELECT
+   FROM vbap
+   FIELDS vbeln,posnr,netpr,matnr
+   FOR ALL ENTRIES IN @lt_vbak
+   WHERE vbeln = @lt_vbak-vbeln
+   INTO TABLE @DATA(lt_vbap).
+  IF sy-subrc IS INITIAL.
+  ENDIF.
+ENDIF.
+
+CONVERT DATE sy-datum
+        TIME sy-uzeit
+        INTO TIME STAMP data(lv_ts)
+        TIME ZONE 'UTC+12'..

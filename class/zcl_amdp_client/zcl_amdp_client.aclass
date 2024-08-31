@@ -1,0 +1,47 @@
+CLASS zcl_amdp_client DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC .
+  PUBLIC SECTION.
+    INTERFACES if_amdp_marker_hdb.
+
+    TYPES : tt_zcds_sample_01 TYPE TABLE OF ZVSQL_SAMPLE_01.
+    CLASS-METHODS get_data_cds
+      AMDP OPTIONS
+        CDS SESSION CLIENT iv_clnt
+      IMPORTING VALUE(iv_clnt) TYPE sy-mandt
+      EXPORTING VALUE(et_so)   TYPE tt_zcds_sample_01.
+
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+ENDCLASS.
+
+CLASS zcl_amdp_client IMPLEMENTATION.
+  METHOD get_data_cds BY DATABASE PROCEDURE
+                      FOR HDB
+                      LANGUAGE SQLSCRIPT
+                      USING zcds_sample_01.
+  et_so = select *
+              from zcds_sample_01
+              WHERE mandt = :iv_clnt;
+*              Where mandt = session_context( 'CDS_CLIENT' );
+  ENDMETHOD.
+
+ENDCLASS.
+
+
+
+**********************************************************************
+
+
+**********************************************************************
+*AMDP does not support implicit client handling.
+*We should pass client in parameter interface
+
+*Exception :- When we are calling another CDS view which is using
+* @ClientHandling.algorithm:#SESSION_VARIABLE.
+*  In this case CDS_CLIENT is used in where condition which came
+*from AMDP OPTIONS CDS SESSION CLIENT .
+*If it is not specified or passed from importing
+*parameter then and it is different from CDS_CLIENT
+*we will get empty result

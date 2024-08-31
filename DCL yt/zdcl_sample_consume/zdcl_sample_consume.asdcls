@@ -1,0 +1,12 @@
+@EndUserText.label: 'ZDCL_sample_consume'
+@MappingRole: true
+define role ZDCL_SAMPLE_CONSUME {
+    grant
+        select
+            on
+                ZDDLS_SAMPLE_CUNSUME_CDS
+                    where
+                       inherit ZDCL_SAMPLE_01
+                        for grant select on zcds_sample_01
+                        or vkorg = '1710';           
+}

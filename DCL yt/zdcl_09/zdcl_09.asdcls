@@ -1,0 +1,11 @@
+@EndUserText.label: 'dcl for 09'
+@MappingRole: true
+define role ZDCL_09 {
+    grant
+        select
+            on
+                ZDDLS_SAMPLE_09_INHERITDCL;
+//                    where                    
+// inheriting conditions from entity zcds_sample_01;
+                        
+}

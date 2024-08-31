@@ -1,0 +1,35 @@
+*&---------------------------------------------------------------------*
+*& Report ZDEMO_CODE
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zdemo_code.
+TABLES :mara.
+DATA : lt_mara  TYPE TABLE OF mara,
+       lt_mara1 TYPE TABLE OF mara,
+       ls_mara  TYPE mara,
+       ls_mara1 TYPE mara.
+
+SELECTION-SCREEN : BEGIN OF BLOCK b1 WITH FRAME TITLE TEXT-001.
+  SELECT-OPTIONS : s_date FOR mara-ersda NO-DISPLAY.
+SELECTION-SCREEN :END OF BLOCK b1.
+
+INITIALIZATION.
+  s_date-sign = 'I'.
+  s_date-option = 'BT'.
+  s_date-low = '20200104'.
+  s_date-high = sy-datum.
+  APPEND s_date.
+
+  SELECT *
+        FROM mara INTO TABLE lt_mara
+        WHERE ersda IN s_date.
+
+LOOP AT lt_mara INTO ls_mara.
+  clear ls_mara1.
+  READ TABLE lt_mara INTO ls_mara1 WITH KEY matnr+0(4) = 'SFDC'.
+  IF sy-subrc = 0.
+    APPEND ls_mara1 TO lt_mara1.
+    clear ls_mara1.
+  ENDIF.
+ENDLOOP.

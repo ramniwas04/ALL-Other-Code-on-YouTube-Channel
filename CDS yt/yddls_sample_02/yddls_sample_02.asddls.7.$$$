@@ -1,0 +1,47 @@
+@AbapCatalog.viewEnhancementCategory: [#NONE]
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: ' CDS'
+@Metadata.ignorePropagatedAnnotations: true
+@ObjectModel.usageType:{
+    serviceQuality: #X,
+    sizeCategory: #S,
+    dataClass: #MIXED
+}
+define view entity Yddls_Sample_02
+  as select from    vbak 
+    association[0..1] to vbap as _item on vbak.vbeln = _item.vbeln
+{
+  key vbeln as so,
+      vkorg as sales_org,
+      //      head.vkgrp
+      //      count(*) as count_num
+     
+      //      0.23       as num_lit,
+      //      'cds'      as char_lit
+      _item
+}
+
+-- In case of left outer join we need to give head.fieldname
+--In case of association not andatory to give aliase name for left table
+--cardinality always talk about right table
+-- Number of entries will behave defferent in case 0..1 same as LOJ
+
+
+
+
+
+
+
+
+
+
+//When to one join is used (Specifies the cardinality of a left outer join):-
+/*
+-> select no contain any fields from RHS then optimization take plae
+-> Aggregate function  count(*) is used then optimization take plae
+*/
+
+/*
+1:N left outer join  :- it will create join even we don't fetch data from rhs table
+N:1 left outer join  :- it will not create join if we don't fetch data from rhs table
+*/

@@ -1,0 +1,15 @@
+@EndUserText.label: 'Access control sample 01'
+@MappingRole: true
+define role ZDCL_SAMPLE_01 {
+    grant
+        select
+            on
+                zcds_sample_01
+                  where (vkorg) = aspect pfcg_auth( zvkorg,ZVKORG,ACTVT='03');
+//   grant
+//        select
+//            on
+//                zcds_sample_01
+//                combination mode or
+//                  where vbtyp = 'C';                                             
+}

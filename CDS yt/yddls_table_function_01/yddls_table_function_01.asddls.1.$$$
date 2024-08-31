@@ -1,0 +1,9 @@
+@EndUserText.label: 'CDS Table Function'
+define table function Yddls_Table_Function_01
+with parameters parameter_name : parameter_type
+returns {
+  client_element_name : abap.clnt;
+  element_name : element_type;
+  
+}
+implemented by method class_name=>method_name;

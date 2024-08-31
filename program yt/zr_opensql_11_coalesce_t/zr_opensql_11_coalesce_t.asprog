@@ -1,0 +1,68 @@
+*&---------------------------------------------------------------------*
+*& Report zr_opensql_11_coalesce_t
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zr_opensql_11_coalesce_t.
+
+
+SELECT
+ FROM vbak AS so
+ LEFT OUTER JOIN vbfa AS flow
+ ON flow~vbelv = so~vbeln
+ AND flow~vbtyp_v = 'C'
+ AND flow~vbtyp_n = 'M'
+ LEFT OUTER JOIN vbrk AS inv
+  ON inv~vbeln = flow~vbeln
+  FIELDS so~vbeln AS sales_order,
+         so~netwr AS so_amount,
+         inv~netwr AS inv_amount,
+         CASE WHEN inv~netwr IS NOT NULL  THEN  inv~netwr
+         ELSE so~netwr
+         END AS amount_net,
+         COALESCE( inv~netwr , so~netwr ) as amount_co
+  INTO TABLE @DATA(it_result).
+IF sy-subrc IS INITIAL.
+  cl_demo_output=>display( it_result ).
+ENDIF.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*CASE WHEN arg1 IS NOT NULL THEN arg1
+*     WHEN arg2 IS NOT NULL THEN arg2
+*     ...
+*     ELSE argn
+*END
+
+* COALESCE( arg1, arg2, ..., argn )
+
+*A null value is an initial value of an empty column in the row of a database table.
+*Null values do not correspond to any content of data objects in ABAP.
+*In Open SQL, null values can handled using the condition IS NULL and the function coalesce.

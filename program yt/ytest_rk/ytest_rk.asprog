@@ -1,0 +1,46 @@
+*&---------------------------------------------------------------------*
+*& Report YTEST_RK
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT YTEST_RK.
+
+ DATA:  http_client    TYPE REF TO if_http_client ,
+       http_url       TYPE string                ,
+       p_content      TYPE string.
+
+    http_url = 'https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=Vijayawada&destinations=Bangalore&key=AIzaSyBWeUcEyD7M5KiMQH5S_2qF-EO25z2OpdA'.
+
+CALL METHOD cl_http_client=>create_by_url
+    EXPORTING
+      url                = http_url
+      ssl_id             = 'ANONYM'
+    IMPORTING
+      client             = http_client
+    EXCEPTIONS
+      argument_not_found = 1
+      plugin_not_active  = 2
+      internal_error     = 3
+      OTHERS             = 4.
+
+CALL METHOD http_client->request->set_header_field
+      EXPORTING
+        name  = 'Content-Type'
+        value = 'application/json'.
+
+http_client->request->set_header_field( name  = '~request_method' value = 'GET' ).
+* Send the request
+  http_client->send( ).
+
+* Reterive the result
+  CALL METHOD http_client->receive
+    EXCEPTIONS
+      http_communication_failure = 1
+      http_invalid_state         = 2
+      http_processing_failed     = 3
+      OTHERS                     = 4.
+
+  data(lv_http_status) =  http_client->response->get_header_field('~status_code').
+
+  p_content = http_client->response->get_cdata( ).
+  BREAK-POINT.

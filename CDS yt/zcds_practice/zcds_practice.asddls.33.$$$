@@ -1,0 +1,15 @@
+@AbapCatalog.sqlViewName: 'ZVCDS_PRACTICE'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'ssds'
+define view ZCDS_practice
+  as select from vbak
+{
+  key vbeln as so,
+      vkorg as sales_org,   
+      vkgrp as sales_grp
+}
+//SQL views and CDS entities are part of one and the same namespace.
+//Therefore, you must assign different names for an SQL view and 
+//the entity.

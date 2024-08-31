@@ -1,0 +1,27 @@
+@EndUserText.label: 'DCL for 05'
+@MappingRole: true
+define role YDCL_05 {
+    grant
+        select
+            on
+                YDDLS_SAMPLE_05
+                    where
+                        inherit YDCL_04
+                        for grant select on YDDLS_SAMPLE_04
+                        and posnr = '000020';                  
+}
+//INHERIT parent_role FOR GRANT SELECT ON cds_entity 
+//This variant of an inheritance condition copies the access rules 
+//declared in the CDS role parent_role for the CDS cds_entity. 
+//If the role parent_role has multiple access rules for the same 
+//CDS entity cds_entity, they are inherited using conditions joined 
+//by a logical "or". 
+//Full access rules cannot be inherited.
+
+//INHERITING CONDITIONS FROM ENTITY cds_entity [DEFAULT TRUE|FALSE] [REPLACING ...] 
+//If the CDS entity does not have any access conditions yet, the addition DEFAULT must be specified. 
+// ◾Unlike in the previous role-based inheritance, this variant also allows the inheritance of a full access rule and replaces the expression INHERITING CONDITIONS ... with the Boolean predicate TRUE.
+//◾An annotation@AccessControl.authorizationCheck in the source code of the parent CDS entity cds_entity is ignored by INHERITING CONDITIONS. The access rules are passed to the current CDS role even if the value #NOT_ALLOWED is specified. 
+//                       inheriting conditions 
+//                         from entity YDDLS_SAMPLE_04
+//                         and posnr = '000020' ;

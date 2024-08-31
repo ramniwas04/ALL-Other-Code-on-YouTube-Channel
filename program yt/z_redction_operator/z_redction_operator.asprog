@@ -1,0 +1,117 @@
+*&---------------------------------------------------------------------*
+*& Report z_redction_operator
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT z_redction_operator.
+
+CLASS lcl_demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.
+
+CLASS lcl_demo IMPLEMENTATION.
+  METHOD main.
+
+    DATA(lr_out) = cl_demo_output=>new( ).
+
+    lr_out->next_section( 'Summation' ).
+
+    DATA(lv_value) = REDUCE i( INIT sum = 0
+                               FOR n = 1 THEN n + 1  UNTIL n > 10
+                               NEXT sum = sum + n ) .
+
+    lr_out->write( lv_value ).
+
+
+    lr_out->next_section( 'Concatenation without THEN' ).
+
+    lr_out->write( REDUCE string( INIT text = `Count up:`
+                             FOR n = 1 UNTIL n > 10
+                             NEXT text = text && | { n }| ) ).
+
+*
+    lr_out->next_section( 'Concatenation with THEN' ).
+
+    lr_out->write( REDUCE string( INIT text = `Count down:`
+                             FOR n = 10 THEN n - 1 WHILE n > 0
+                             NEXT text = text && | { n }| ) ).
+
+*
+    lr_out->next_section( 'Non arithmetic expression' ).
+    lr_out->write( REDUCE string( INIT text = ``
+                             FOR t = `x` THEN t && `y`
+                                         UNTIL strlen( t ) > 10
+                             NEXT text = text && |{ t } | ) ).
+    lr_out->display(  ).
+
+*    TYPES: BEGIN OF helper_type,
+*             vbeln TYPE vbak-vbeln,
+*             vkorg TYPE vbak-vkorg,
+*             netpr TYPE vbap-netpr,
+*             matnr TYPE string,
+*           END OF helper_type.
+*    TYPES: BEGIN OF ty_vbap_r,
+*             netpr TYPE vbap-netpr,
+*             matnr TYPE string,
+*           END OF ty_vbap_r.
+*
+*    DATA: it_final TYPE STANDARD TABLE OF helper_type.
+*
+*    SELECT
+*     FROM vbak
+*     FIELDS vbeln,vkorg
+*     INTO TABLE @DATA(lt_vbak).
+*    IF sy-subrc IS INITIAL.
+*      SELECT
+*       FROM vbap
+*       FIELDS vbeln,posnr,netpr,matnr
+*       FOR ALL ENTRIES IN @lt_vbak
+*       WHERE vbeln = @lt_vbak-vbeln
+*       INTO TABLE @DATA(lt_vbap).
+*      IF sy-subrc IS INITIAL.
+*        LOOP AT lt_vbak ASSIGNING FIELD-SYMBOL(<ls_vbak>).
+*          APPEND INITIAL LINE TO it_final ASSIGNING FIELD-SYMBOL(<ls_final>).
+*          <ls_final>-vbeln = <ls_vbak>-vbeln.
+*          <ls_final>-vkorg = <ls_vbak>-vkorg.
+*
+*
+**          <ls_final>-netpr = REDUCE #( INIT lv_tot_net TYPE netpr
+**                                       FOR ls_vbap IN lt_vbap WHERE ( vbeln = <ls_vbak>-vbeln )
+**                                       NEXT lv_tot_net = lv_tot_net + ls_vbap-netpr ).
+**
+**          <ls_final>-matnr = REDUCE #( INIT lv_matnrs TYPE string
+**                                            lv_sep   = ' '
+**                                       FOR ls_vbap IN lt_vbap WHERE ( vbeln = <ls_vbak>-vbeln )
+**                                       NEXT lv_matnrs =  ls_vbap-matnr && lv_sep  && lv_matnrs
+**                                            lv_sep    =  ',').
+*
+*
+*          DATA(ls_vbap_r) = REDUCE ty_vbap_r( INIT ls_vbap_r1 TYPE ty_vbap_r
+*                                                   lv_sep   = ' '
+*                                               FOR ls_vbap IN lt_vbap WHERE ( vbeln = <ls_vbak>-vbeln )
+*                                               NEXT ls_vbap_r1-netpr = ls_vbap_r1-netpr +  ls_vbap-netpr
+*                                                    ls_vbap_r1-matnr = ls_vbap-matnr && lv_sep &&  ls_vbap_r1-matnr
+*                                                    lv_sep    =  ',').
+*          <ls_final>-netpr  =    ls_vbap_r-netpr.
+*          <ls_final>-matnr  =    ls_vbap_r-matnr.
+*
+*          CLEAR ls_vbap_r.
+*
+*        ENDLOOP.
+*
+*        cl_demo_output=>display(
+*          EXPORTING
+*            data = it_final
+**            name =
+*        ).
+
+*  ENDIF.
+*ENDIF.
+
+
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  lcl_demo=>main( ).

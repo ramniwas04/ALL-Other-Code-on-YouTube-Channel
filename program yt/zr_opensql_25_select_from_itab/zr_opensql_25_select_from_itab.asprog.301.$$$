@@ -1,0 +1,15 @@
+*&---------------------------------------------------------------------*
+*& Report zr_opensql_25_select_from_itab
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zr_opensql_25_select_from_itab.
+
+*FOR ALL ENTRIES cannot be combined with the SQL Expressions like aggregate expressions.
+*GROUP BY clause is not allowed to use with FOR ALL ENTRIES statement.
+
+*The select statement must be prefixed with the @ character
+*Only one internal table as a source can be specified in the select statement
+*There must have an alias using AS Statement
+*It should not have deep structures or contains type string
+*It should not contain any obsolete data type

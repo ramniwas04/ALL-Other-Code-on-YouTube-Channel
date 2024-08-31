@@ -1,0 +1,38 @@
+*&---------------------------------------------------------------------*
+*& Report zr_opensql_02_literals_t
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zr_opensql_02_literals_t.
+
+DATA: lv_matnr TYPE matnr.
+
+SELECTION-SCREEN BEGIN OF BLOCK b1 WITH FRAME TITLE TEXT-001.
+  SELECT-OPTIONS: s_matnr FOR lv_matnr.
+SELECTION-SCREEN END OF BLOCK b1.
+
+DATA: lt_matnr_range TYPE RANGE OF matnr,
+      ls_matnr_range LIKE LINE OF lt_matnr_range.
+      
+ls_matnr_range-sign = 'I'.
+ls_matnr_range-option = 'CP'.
+ls_matnr_range-low = 'SFDC*'.
+APPEND ls_matnr_range TO lt_matnr_range.
+
+SELECT 'I' AS sign,
+       'EQ' AS option,
+       matnr AS low
+FROM mara
+INTO TABLE @s_matnr
+WHERE ( matnr in @s_matnr[] AND matnr IN @lt_matnr_range ).
+
+*string literals are not allowed and only text field literals of the type c can be used as character literals
+*The value of a numeric literal must be in the value range of type i, which means it always has type i.
+
+
+SELECT so~vbeln,
+       'X' AS literal_x,
+       42  AS literal_42
+       FROM vbak AS so
+       INTO TABLE @DATA(lt_result).
+cl_demo_output=>display( s_matnr[] ).

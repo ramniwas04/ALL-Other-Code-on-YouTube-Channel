@@ -1,0 +1,17 @@
+*&---------------------------------------------------------------------*
+*& Report ZR_HELLO_WORLD_YU
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zr_hello_world_yu.
+
+DATA lv_string TYPE string.
+DATA lv_name TYPE sy-uname.
+
+lv_name = cl_abap_syst=>get_user_name( ).
+ENHANCEMENT-POINT Z_ENH_POINT_RAM SPOTS Z_ENH_SPOT_RAM .
+
+ENHANCEMENT-SECTION Z_ENH_SECTION_RAM SPOTS Z_ENH_SPOT_RAM .
+lv_string = |hello { lv_name }, Welcome to the abap development for sap hana!|.
+END-ENHANCEMENT-SECTION.
+WRITE: lv_string.

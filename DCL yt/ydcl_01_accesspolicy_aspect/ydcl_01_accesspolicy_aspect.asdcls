@@ -1,0 +1,11 @@
+define accesspolicy YDCL_01_ACCESSPOLICY_ASPECT {
+    @EndUserText.label: 'YDCL_01_accesspolicy_aspect'
+    define aspect YDCL_01_ACCESSPOLICY_ASPECT as
+        select from YDDLS_SMAPLE_01 
+             with user element ernam
+            {
+            
+              sales_org
+            }
+            
+}

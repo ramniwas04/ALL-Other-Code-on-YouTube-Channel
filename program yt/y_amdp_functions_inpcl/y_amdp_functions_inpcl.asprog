@@ -1,0 +1,29 @@
+REPORT y_amdp_functions_inpcl.
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.
+
+CLASS demo IMPLEMENTATION.
+  METHOD main.
+    IF NOT cl_abap_dbfeatures=>use_features(
+          EXPORTING
+            requested_features =
+              VALUE #( ( cl_abap_dbfeatures=>call_amdp_method )
+                       ( cl_abap_dbfeatures=>amdp_table_function ) ) ).
+      cl_demo_output=>display(
+        `System does not support AMDP or CDS table functions` ).
+      RETURN.
+    ENDIF.
+*Call directly AMDP table function first
+*Call  AMDP table function trough another public function\
+*AMDP table function for CDS call
+*AMDP scalar function called from ABAP Directly
+*AMDP scalar function called through database procedure
+
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  demo=>main( ).

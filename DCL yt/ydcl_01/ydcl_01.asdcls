@@ -1,0 +1,25 @@
+@EndUserText.label: 'dcl01'
+@MappingRole: true
+define role YDCL_01 {
+    grant
+ select
+     on
+         YDDLS_SMAPLE_01
+//           where (sales_org) = aspect YDCL_01_ACCESSPOLICY_ASPECT
+          
+//           where
+//            vbeln between '0000000001' and '0000000011'
+//            or
+//            vbeln like '000000053_' 
+//            or
+//            vbeln like '000000053%' 
+         
+         
+//             where
+//              $parameters.p_date = '20220511'
+//              and
+//              $session.user = aspect user
+//              and 
+//              'user_id'  = aspect user ; 
+;                       
+}

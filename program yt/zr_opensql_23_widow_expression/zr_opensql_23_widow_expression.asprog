@@ -1,0 +1,77 @@
+*&---------------------------------------------------------------------*
+*& Report zr_opensql_23_widow_expression
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zr_opensql_23_widow_expression.
+
+SELECT
+ FROM vbak
+ FIELDS vbeln AS so,
+        kunnr AS cust_id,
+        waerk AS curre,
+        netwr AS net_amt,
+        SUM( netwr ) OVER(
+                         PARTITION BY kunnr
+                         ORDER BY netwr
+**ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+ ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+* ROWS BETWEEN 2 PRECEDING AND 2 FOLLOWING
+                         ) AS net_amount_per_cust,
+        COUNT( netwr ) OVER(
+                        PARTITION BY kunnr
+                        ORDER BY netwr
+*ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+ ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+* ROWS BETWEEN 2 PRECEDING AND 2 FOLLOWING
+                         ) AS so_count_per_cudt
+ WHERE kunnr IN ( '0000000001','0000000111' )
+ INTO TABLE @DATA(it_result).
+IF sy-subrc IS INITIAL.
+  cl_demo_output=>display( it_result ).
+ENDIF.
+**********************************************************************
+
+*Over Clause :- It define partitioning and ordering of rows
+*  where window function can be perform
+*Order BY Clause :- Define the order of the rows and frame  within current window
+*Partition by clause :- divide query result in partition.
+*  Then window Function apply to each partition
+*  If we don' define it take entire result
+*Rows and range Clause :- It limits the rows within partition.
+*  By specifying start and end point within partition
+* ORDER BY is mandatory.
+*ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+*ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+*ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING
+*Window Function
+*  | AVG( col [AS dtype] )
+*  | MEDIAN( sql_exp )
+*  | MAX( sql_exp )
+*  | MIN( sql_exp )
+*  | SUM( sql_exp )
+*  | STDDEV( sql_exp )
+*  | VAR( sql_exp )
+*  | CORR( sql_exp1,sql_exp2 )
+*  | CORR_SPEARMAN( sql_exp,sql_exp2 )
+*  | COUNT( sql_exp )
+*  | COUNT( * )
+*  | COUNT(*)
+*  | ROW_NUMBER( )
+*  | RANK( )
+*  | DENSE_RANK( )
+*  | NTILE( n )
+*  | LEAD|LAG( sql_exp1[, diff[, sql_exp2]] )
+*  | FIRST_VALUE|LAST_VALUE( col ) ...
+
+
+*
+*        AVG( netwr ) OVER(  PARTITION BY kunnr
+*                           ORDER BY kunnr,netwr
+*                           rows BETWEEN UNBOUNDED  PRECEDING AND  UNBOUNDED FOLLOWING
+*                           ) AS avg_cust_net,
+*        COUNT( netwr ) OVER( PARTITION BY kunnr
+*                             ORDER BY kunnr,netwr
+*                             ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+*                             ) AS avg_cust_count
+**********************************************************************

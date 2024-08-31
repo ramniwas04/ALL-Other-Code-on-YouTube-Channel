@@ -1,0 +1,34 @@
+*&---------------------------------------------------------------------*
+*& Report zr_opensql_05_concat_t
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zr_opensql_05_concat_t.
+
+select
+ from mara as a
+ INNER JOIN makt as b
+ on a~matnr = b~matnr
+ and b~spras = 'E'
+ FIELDS a~matnr && '     (' && b~maktx && ')'
+ INTO TABLE @DATA(lt_mara)
+ UP TO 10 ROWS.
+ IF sy-subrc is INITIAL.
+
+  cl_demo_output=>display(
+    EXPORTING
+      data = lt_mara
+*      name =
+  ).
+ ENDIF.
+
+*SELECT company_name  && ' (' && legal_form && ')'
+*  FROM snwd_bpa
+*  INTO TABLE @DATA(lt_result).
+*
+*
+*  cl_demo_output=>display(
+*    EXPORTING
+*      data = lt_result
+**      name =
+*  ).

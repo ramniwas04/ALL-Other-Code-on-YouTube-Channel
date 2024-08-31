@@ -1,0 +1,42 @@
+*&---------------------------------------------------------------------*
+*& Report z_cds_table_fun_use
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT z_cds_table_fun_use.
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.
+
+CLASS demo IMPLEMENTATION.
+
+  METHOD main.
+
+    IF (  cl_abap_dbfeatures=>use_features(
+      EXPORTING
+        requested_features = VALUE #( ( cl_abap_dbfeatures=>amdp_table_function ) )
+    ) ).
+
+      SELECT *
+        FROM zddls_my_first_cds_table_fun( client1 = '800' )
+*        USING CLIENT '800'
+        INTO TABLE @DATA(it_result).
+      IF sy-subrc IS INITIAL.
+        data(lv_count) = lines( it_result ).
+        cl_demo_output=>Write( lv_count ).
+        cl_demo_output=>display( it_result ).
+      ENDIF.
+
+    ELSE.
+
+
+    ENDIF.
+
+  ENDMETHOD.
+
+ENDCLASS.
+
+START-OF-SELECTION.
+  demo=>main( ).

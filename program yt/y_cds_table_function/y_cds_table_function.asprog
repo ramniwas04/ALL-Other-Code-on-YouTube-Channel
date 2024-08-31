@@ -1,0 +1,42 @@
+*&---------------------------------------------------------------------*
+*& Report y_cds_table_function
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT y_cds_table_function.
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.
+
+CLASS demo IMPLEMENTATION.
+
+  METHOD main.
+    DATA(lv_support_amadp) =  cl_abap_dbfeatures=>use_features(
+                     EXPORTING
+                      requested_features = VALUE #( ( cl_abap_dbfeatures=>amdp_table_function ) )
+      ).
+*   CATCH cx_abap_invalid_param_value.
+    IF lv_support_amadp = 'X'.
+      SELECT *
+       FROM Zddls_My_First_Cds_Table_Fun
+       USING CLIENT '800'
+*       CLIENT SPECIFIED  yddls_table_function_01~client_element_name
+       INTO TABLE @DATA(it_tab).
+      IF sy-subrc IS INITIAL.
+        DATA(lv_lines) = lines( it_tab ).
+        cl_demo_output=>write( lv_lines ).
+        cl_demo_output=>display( it_tab ).
+      ENDIF.
+    ELSE.
+      RETURN.
+    ENDIF.
+
+
+  ENDMETHOD.
+
+ENDCLASS.
+
+START-OF-SELECTION.
+  demo=>main( ).

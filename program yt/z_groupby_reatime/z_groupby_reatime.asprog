@@ -1,0 +1,133 @@
+*&---------------------------------------------------------------------*
+*& Report z_groupby_reatime
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT z_groupby_reatime.
+
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+  PRIVATE SECTION.
+    TYPES: BEGIN OF ty_item,
+             vbeln TYPE vbak-vbeln,
+             posnr TYPE vbap-posnr,
+             matnr TYPE vbap-matnr,
+           END OF ty_item.
+    CLASS-DATA: lt_item TYPE STANDARD TABLE OF ty_item.
+    CLASS-METHODS change_sales_order
+      IMPORTING
+        i_lt_item  LIKE lt_item
+      EXPORTING
+        lv_message TYPE bapiret2-message .
+ENDCLASS.
+
+CLASS demo IMPLEMENTATION.
+
+  METHOD main.
+
+    SELECT
+       FROM vbak AS a
+       INNER JOIN vbap AS b
+       ON a~vbeln = b~vbeln
+       FIELDS a~vbeln,b~posnr,b~matnr,a~vkorg,a~vkgrp,b~netpr
+       INTO TABLE @DATA(lt_so).
+    IF sy-subrc IS INITIAL.
+*     sort  lt_so by vbeln.
+*      LOOP AT lt_so ASSIGNING FIELD-SYMBOL(<ls_so>).
+*
+*        APPEND VALUE #( vbeln = <ls_so>-vbeln
+*                        posnr = <ls_so>-posnr
+*                        matnr = <ls_so>-matnr ) TO lt_item.
+*        AT END OF vbeln.
+*
+*          change_sales_order( lt_item ).
+*        ENDAT.
+*      ENDLOOP.
+**********************************************************************
+*      DATA:lv_sum TYPE netpr.
+*      LOOP AT lt_so ASSIGNING FIELD-SYMBOL(<ls_so>)
+*                    GROUP BY <ls_so>-vbeln
+*                    INTO DATA(lt_grp) .
+*
+*        change_sales_order( VALUE #( FOR ls_grp IN GROUP lt_grp (  vbeln = ls_grp-vbeln
+*                                                         posnr = ls_grp-posnr
+*                                                         matnr = ls_grp-matnr ) ) ).
+*
+*        lv_sum = REDUCE #( INIT lv_netpr TYPE netpr
+*                             FOR ls_grp IN GROUP lt_grp
+*                             NEXT lv_netpr = ls_grp-netpr + lv_netpr  )  .
+*
+**WE can do line item level qty and aount addition using reduce along with for in group
+*
+*
+*      ENDLOOP.
+**********************************************************************
+      change_sales_order(
+        EXPORTING
+          i_lt_item  =  lt_item
+        IMPORTING
+          lv_message = DATA(msg)
+      ).
+
+      cl_demo_output=>display(
+        EXPORTING
+          data = msg
+*            name =
+      ).
+
+**********************************************************************
+
+    ENDIF.
+
+
+  ENDMETHOD.
+
+
+  METHOD change_sales_order.
+*Call bapi to change sales order item and pass lt_item
+
+*Priority Queue for Messages
+
+    DATA lt_return TYPE TABLE OF bapiret2.
+
+    lt_return = VALUE #(    ( type = 'A' message = 'termination message' )
+                          ( type = 'W' message = 'Warning message' )
+                          ( type = 'I' message = 'Information message' )
+                          ( type = 'E' message = 'Error message' )
+                          ( type = 'S' message = 'Status message' )
+                          ( type = 'X' message = 'exit  message' ) ).
+*AEISWX
+*    DATA ls_return TYPE bapiret2.
+*
+*    SORT lt_return BY type.
+*    LOOP AT lt_return INTO ls_return.
+*      EXIT.
+*    ENDLOOP.
+*    lv_message = ls_return-message.
+*Replacement
+
+*    LOOP AT lt_return INTO DATA(ls_return)
+*                      GROUP BY ls_return-type
+*                      DESCENDING.
+*      lv_message = ls_return-message.
+*      RETURN.
+*    ENDLOOP.
+
+    LOOP AT lt_return INTO DATA(ls_return)
+                      GROUP BY translate( val =  ls_return-type  from = `IAXEWS ` to = `012345` )
+                      ASCENDING.
+      lv_message = ls_return-message.
+      RETURN.
+    ENDLOOP.
+
+
+
+
+
+  ENDMETHOD.
+
+ENDCLASS.
+
+START-OF-SELECTION.
+  demo=>main( ).

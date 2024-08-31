@@ -1,0 +1,45 @@
+CLASS zcl_diff_types_amdp DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+    INTERFACES if_amdp_marker_hdb.
+    TYPES:
+      BEGIN OF ty_scarr_spfli,
+        carrname TYPE scarr-carrname,
+        connid   TYPE spfli-connid,
+        cityfrom TYPE spfli-cityfrom,
+        cityto   TYPE spfli-cityto,
+      END OF ty_scarr_spfli,
+      tt_scarr_spfli TYPE STANDARD TABLE OF ty_scarr_spfli WITH EMPTY KEY,
+      BEGIN OF ty_spfli,
+        carrid   TYPE spfli-carrid,
+        connid   TYPE spfli-connid,
+        cityfrom TYPE spfli-cityfrom,
+        cityto   TYPE spfli-cityto,
+        fltime   TYPE spfli-fltime,
+      END OF ty_spfli,
+      tt_spfli TYPE STANDARD TABLE OF ty_spfli WITH EMPTY KEY.
+*Create AMDP table function to get scarr_spfli data
+*Try to call in normal program directly
+*Create a procedure and ca;; inside that procedure this table function
+*Create a scalar table function to get max flight time
+*Consume Scalar table function inside procedure
+
+
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+
+ENDCLASS.
+
+
+*Call directly AMDP table function first
+*Call  AMDP table function trough another public function\
+*AMDP table function for CDS call
+*AMDP scalar function called from ABAP Directly
+*AMDP scalar function called through database procedure
+
+
+CLASS zcl_diff_types_amdp IMPLEMENTATION.
+ENDCLASS.

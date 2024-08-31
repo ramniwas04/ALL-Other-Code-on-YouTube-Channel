@@ -1,0 +1,55 @@
+*&---------------------------------------------------------------------*
+*& Report zr_opensql_14_join_t
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zr_opensql_14_join_t.
+CLASS demo DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+ENDCLASS.
+
+CLASS demo IMPLEMENTATION.
+
+  METHOD main.
+
+    SELECT
+     FROM vbak AS so
+     RIGHT OUTER JOIN kna1 AS cust
+     ON so~kunnr = cust~kunnr
+     FIELDS cust~kunnr,
+            so~vbeln,
+            so~netwr
+     INTO TABLE @DATA(it_result).
+    IF sy-subrc IS INITIAL.
+      cl_demo_output=>write( it_result  ).
+    ENDIF.
+
+
+    TYPES: BEGIN OF helper_type.
+    TYPES   clnt TYPE t000-mandt.
+    TYPES    desc TYPE t000-mtext.
+    INCLUDE TYPE t100.
+    TYPES      END OF helper_type.
+    DATA: it_result1 TYPE STANDARD TABLE OF helper_type.
+
+    SELECT
+     FROM t000 AS clnt
+     INNER JOIN t100 AS msg
+     ON 1 = 1
+     FIELDS clnt~mandt AS clnt,
+            clnt~mtext AS desc,
+            msg~*
+     WHERE msg~arbgb = 'SABAPDEMOS'
+      INTO TABLE @it_result1      .
+    IF sy-subrc IS INITIAL.
+      DATA(lv_count) = lines( it_result ).
+      cl_demo_output=>write( lv_count ).
+      cl_demo_output=>display( it_result1 ).
+    ENDIF.
+  ENDMETHOD.
+
+ENDCLASS.
+
+START-OF-SELECTION.
+  demo=>main( ).

@@ -1,0 +1,110 @@
+*&---------------------------------------------------------------------*
+*& Report z_cds_cunsumption
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT z_cds_cunsumption.
+
+
+SELECT *
+ FROM zcds_sample_01
+ INTO TABLE @DATA(it_result).
+IF sy-subrc IS INITIAL.
+  cl_demo_output=>display( it_result ).
+ENDIF.
+
+
+
+
+
+
+
+
+
+*cl_salv_gui_table_ida=>create_for_cds_view(
+*  EXPORTING
+*    iv_cds_view_name      = 'ZDDLS_SAMPLE_04'
+**    io_gui_container      =
+**    io_calc_field_handler =
+**  RECEIVING
+**    ro_alv_gui_table_ida  =
+*)->fullscreen( )->display( ).
+*CATCH cx_salv_ida_contract_violation..
+*CATCH cx_salv_db_connection.
+*CATCH cx_salv_db_table_not_supported.
+*CATCH cx_salv_ida_contract_violation.
+*CATCH cx_salv_function_not_supported.
+
+*cl_dd_ddl_annotation_service=>get_annos(
+*  EXPORTING
+*    entityname         =  'ZDDLS_SAMPLE_04'
+**    variant            = ''
+**    language           = SY-LANGU
+**    extend             = abap_false
+**    metadata_extension = abap_true
+**    translation        = abap_true
+**    null_values        = abap_false
+*  IMPORTING
+*    entity_annos       = DATA(ls_anno)
+*    element_annos      = DATA(ls_ele_annos)
+**    parameter_annos    =
+**    annos_tstmp        =
+*).
+*cl_demo_output=>write( ls_anno ).
+*cl_demo_output=>display( ls_ele_annos ).
+*SELECT
+*  FROM zddls_sample_04
+*  FIELDS *
+*  INTO TABLE @DATA(it_tab).
+*IF sy-subrc IS INITIAL.
+*  cl_demo_output=>display( it_tab ).
+*ENDIF.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*First Access association in form as a source so inner join
+*Access association in field list so left outer join
+*So we can't use path expression at on condition try to get matdesc
+*With default filter association
+
+*
+*ABAP SQL - Path Expressions,
+*... [source~]\_assoc1[sql_para][attributes]
+*            [\_assoc2[sql_para][attributes]]
+*            [\...] ...
+
+
+
+* Attributes Additions:
+* 1. ... (n|*)
+* 2. ... INNER|{LEFT|RIGHT OUTER}
+*The join type can only be specified together with the cardinality.
+*
+* 3. ... [WHERE] sql_cond  -->using WITH DEFAULT FILTER

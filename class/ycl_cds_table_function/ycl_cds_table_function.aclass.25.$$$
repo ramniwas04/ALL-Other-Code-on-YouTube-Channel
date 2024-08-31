@@ -1,0 +1,58 @@
+CLASS ycl_cds_table_function DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+    INTERFACES if_amdp_marker_hdb.
+
+    CLASS-METHODS get_so_data
+        FOR TABLE FUNCTION yddls_table_function_01 .
+
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+
+
+ENDCLASS.
+
+
+
+CLASS ycl_cds_table_function IMPLEMENTATION.
+  METHOD get_so_data BY DATABASE FUNCTION
+                     FOR HDB
+                     LANGUAGE SQLSCRIPT
+                     OPTIONS READ-ONLY
+                     USING vbak.
+
+    RETURN
+    SELECT so.mandt as client_element_name,
+             so.vbeln as vbeln
+        from vbak as so
+             where so.mandt = :clnt ;
+
+  ENDMETHOD.
+
+ENDCLASS.
+
+
+
+
+
+
+*
+
+*AMDP - Function Implementations
+*implementing an AMDP function as a database function
+*AMDP function = AMDP class Method with by database function
+
+*◾AMDP Table Functions
+*   •AMDP table functions for AMDP methods
+*   •AMDP Table Functions for CDS Table Functions
+**********************************************************************
+*1. CDS table function can only be declared in the public visibility section
+*   of a static AMDP class(Which contain only static components)
+
+
+*◾AMDP Scalar Functions
+
+*/

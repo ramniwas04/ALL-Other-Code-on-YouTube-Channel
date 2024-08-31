@@ -1,0 +1,277 @@
+*&---------------------------------------------------------------------*
+*& Report ZTEST_RAM
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ztest_ram.
+*
+*DATA result TYPE STRING.
+*
+*result = find( val = 'abapABAP' sub = 'A' occ = 2 case ='x').
+*
+*WRITE result.
+SELECT
+ FROM vbak AS kh
+ INNER JOIN vbap AS pi
+ON kh~vbeln = pi~vbeln
+FIELDS kh~vbeln AS sales_ORDER,
+       kh~kunnr AS customer,
+       kh~waerk AS currecny,
+       pi~posnr AS item,
+        SUM( kh~netwr ) AS tot_price,
+         AVG( kh~netwr ) AS avg,
+MIN( kh~netwr ) AS min,
+MAX(  kh~netwr ) AS max,
+COUNT( * ) OVER( ) AS cnt
+GROUP BY kh~vbeln, kh~kunnr, kh~waerk,pi~posnr
+INTO TABLE @DATA(it_dat).
+
+cl_demo_output=>display( it_dat ).
+**********************************************************************
+*2 errors found. activate anyway?
+*Line 22: "OVER" is
+*invalid here (due to grammar). contains an
+*invalid character or it is a
+*2 errors found. activate anyway?
+*Line 22: "KH" is
+*invalid here (due to grammar). contains an
+*invalid character or it is a
+*can you please tell as why I can’t use netwr in count ? I have written the same code as of yours
+
+
+*
+*DATA : it_tmp_inv TYPE ty_inv_sum_tab,
+*       wa_tmp_inv TYPE ty_inv_sum,
+*       v_gp       TYPE p DECIMALS 2.
+*DATA: v_lines   TYPE i,
+*      v_tabix   TYPE sy-tabix,
+*      wa_final1 TYPE ty_final.
+*DESCRIBE TABLE it_final LINES v_lines.
+**If initial sort is by NACS, group them by PRODH(2)
+*IF wa_cust_flags-pri_sort = c_n.
+***There can be more than 1 OI condition Defect 7463 DMattice
+*  LOOP AT it_final INTO wa_final.
+*    CLEAR: v_tabix.
+*    v_tabix = sy-tabix + 1. "Next Item...Should be blank for related conditions
+**  WHERE NOT bil_number IS INITIAL.
+*    IF NOT wa_final-bil_number IS INITIAL. "Main Items...May have more than 1.
+****Begin of Changes Defect 7463 DMattice 03/14/2013
+*      DO.
+*        IF v_tabix LE v_lines. "Less than the total items
+*          CLEAR: wa_final1.
+*          READ TABLE it_final INTO wa_final1 INDEX v_tabix.
+*          IF wa_final1-bil_number IS INITIAL. "Condition items
+*            IF wa_final1-kschl EQ 'ZFAL' OR wa_final1-kschl EQ 'ZCAS'.
+*              wa_tmp_inv-oi = wa_tmp_inv-oi + wa_final1-ecost."add conditions together
+*            ENDIF.
+*          ELSE.
+*            EXIT.
+*          ENDIF.
+*        ELSE.
+*          EXIT.
+*        ENDIF.
+*        ADD 1 TO v_tabix.
+*      ENDDO.
+****End of Changes Defect 7463 DMattice 03/14/2013
+*      wa_tmp_inv-spart   = wa_final-spart.                  "CR 451
+*      IF wa_final-spart EQ c_01.
+*        wa_tmp_inv-code   = '02'.
+*      ELSE.
+*        wa_tmp_inv-code   = wa_final-prodh+0(2).
+*      ENDIF.
+*      IF wa_cust_flags-cigretail_print <> 'Y'.
+** DON'T SUM THE CIGARETTE RETAILS
+**      IF WA_FINAL-PRODH+0(2) <> '02'.
+*        IF wa_final-spart <> c_01.
+*          wa_tmp_inv-retail = wa_final-esrp.
+*        ELSE.
+*          wa_tmp_inv-retail = '0.00'.
+*        ENDIF.
+*      ELSE.
+** SUM THE CIGARETTE RETAILS
+*        wa_tmp_inv-retail = wa_final-esrp.
+*      ENDIF.
+*      wa_tmp_inv-cost   = wa_final-ecost.
+*      wa_tmp_inv-desc   = wa_final-zdeptdesc.
+*      APPEND wa_tmp_inv TO it_tmp_inv.
+*      CLEAR: wa_tmp_inv.
+**    ELSE.
+*    ENDIF.
+*    CLEAR : wa_final.
+*  ENDLOOP.
+**Get Final Invoice Summary Table
+*  SORT it_tmp_inv BY spart code.                            "CR 451
+*  LOOP AT it_tmp_inv INTO wa_tmp_inv.
+*    AT END OF code.
+*      IF wa_tmp_inv-spart NE c_01.
+**  Get Description
+*        READ TABLE it_protxt INTO wa_protxt
+*        WITH KEY  spras = sy-langu
+*        prodh = wa_tmp_inv-code.
+*        IF sy-subrc = 0.
+*          wa_invsum-desc = wa_protxt-vtext.
+*        ENDIF.
+**  Get Total Cost and retail
+*        SUM.
+*        wa_invsum-code   = wa_tmp_inv-code.
+*        wa_invsum-retail = wa_tmp_inv-retail.
+*        wa_invsum-cost   = wa_tmp_inv-cost.
+*        wa_invsum-oi = wa_tmp_inv-oi.
+*        wa_invsum-netcost = wa_invsum-cost + wa_invsum-oi.
+**  Get GP%
+*        IF NOT wa_invsum-retail IS INITIAL.
+**          WA_INVSUM-GP     = ( ( WA_INVSUM-RETAIL - WA_INVSUM-COST ) / WA_INVSUM-RETAIL ) * C_100.
+*          wa_invsum-gp     = ( ( wa_invsum-retail - wa_invsum-netcost ) / wa_invsum-retail ) * c_100.
+*        ENDIF.
+*        APPEND wa_invsum TO it_invsum.
+*        CLEAR wa_invsum.
+*      ENDIF.
+*    ENDAT.
+*    AT END OF spart.
+*      IF wa_tmp_inv-spart = c_01. "Cigarettes
+**  Get Description
+*        READ TABLE it_protxt INTO wa_protxt
+*        WITH KEY  spras = sy-langu
+*        prodh = c_02. "WA_TMP_INV-CODE.
+*        IF sy-subrc = 0.
+*          wa_invsum-desc = wa_protxt-vtext.
+*        ENDIF.
+**  Get Total Cost and retail
+*        SUM.
+*        wa_invsum-code   = c_02. "WA_TMP_INV-CODE.
+*        wa_invsum-retail = wa_tmp_inv-retail.
+*        wa_invsum-cost   = wa_tmp_inv-cost.
+*        wa_invsum-oi = wa_tmp_inv-oi.
+*        wa_invsum-netcost = wa_invsum-cost + wa_invsum-oi.
+**  Get GP%
+*        IF NOT wa_invsum-retail IS INITIAL.
+**          WA_INVSUM-GP     = ( ( WA_INVSUM-RETAIL - WA_INVSUM-COST ) / WA_INVSUM-RETAIL ) * C_100.
+*          wa_invsum-gp     = ( ( wa_invsum-retail - wa_invsum-netcost ) / wa_invsum-retail ) * c_100.
+*        ENDIF.
+*        APPEND wa_invsum TO it_invsum.
+*        CLEAR wa_invsum.
+*      ENDIF.
+*    ENDAT.
+*    CLEAR wa_tmp_inv.
+*  ENDLOOP.
+**If initial sort is by Dept code, group them by dept code
+*ELSEIF wa_cust_flags-pri_sort = c_d.
+*  LOOP AT it_final INTO wa_final.
+*    CLEAR: v_tabix.
+*    v_tabix = sy-tabix + 1. "Next Item
+**  WHERE NOT bil_number IS INITIAL.
+*    IF NOT wa_final-bil_number IS INITIAL. "Main Items
+****Begin of Changes Defect 7463 DMattice 03/14/2013
+*      DO.
+*        IF v_tabix LE v_lines. "Less than the total items
+*          CLEAR: wa_final1.
+*          READ TABLE it_final INTO wa_final1 INDEX v_tabix.
+*          IF wa_final1-bil_number IS INITIAL. "Condition items
+*            IF wa_final1-kschl EQ 'ZFAL' OR wa_final1-kschl EQ 'ZCAS'.
+*              wa_tmp_inv-oi = wa_tmp_inv-oi + wa_final1-ecost."add conditions together
+*            ENDIF.
+*          ELSE.
+*            EXIT.
+*          ENDIF.
+*        ELSE.
+*          EXIT.
+*        ENDIF.
+*        ADD 1 TO v_tabix.
+*      ENDDO.
+****End of Changes Defect 7463 DMattice 03/14/2013
+*      wa_tmp_inv-code   = wa_final-dept.
+*      IF wa_cust_flags-cigretail_print <> 'Y'.
+** DON'T SUM THE CIGARETTE RETAILS
+**      IF WA_FINAL-PRODH+0(2) <> '02'.
+*        IF wa_final-spart <> c_01.
+*          wa_tmp_inv-retail = wa_final-esrp.
+*        ELSE.
+*          wa_tmp_inv-retail = '0.00'.
+*        ENDIF.
+*      ELSE.
+** SUM THE CIGARETTE RETAILS
+*        wa_tmp_inv-retail = wa_final-esrp.
+*      ENDIF.
+*      wa_tmp_inv-cost   = wa_final-ecost.
+*      APPEND wa_tmp_inv TO it_tmp_inv.
+*      CLEAR: wa_tmp_inv.
+*    ENDIF.
+*    CLEAR : wa_final.
+*  ENDLOOP.
+**Get Final Invoice Summary Table by dept code
+*  SORT it_tmp_inv BY code.                                  "5134
+*  LOOP AT it_tmp_inv INTO wa_tmp_inv.
+*    AT END OF code.
+**Get Description
+*      READ TABLE it_depdesc INTO wa_depdesc
+*      WITH KEY hkunnr    = v_chain "IS_BIL_INVOICE-HD_GEN-SOLD_TO_PARTY
+*      zdeptcode = wa_tmp_inv-code.
+*      IF sy-subrc = 0.
+*        wa_invsum-desc = wa_depdesc-zdeptdesc.
+*      ELSE.
+*        READ TABLE it_depdesc INTO wa_depdesc
+*        WITH KEY hkunnr    = v_kunag "IS_BIL_INVOICE-HD_GEN-SOLD_TO_PARTY
+*        zdeptcode = wa_tmp_inv-code.
+*        IF sy-subrc = 0.
+*          wa_invsum-desc = wa_depdesc-zdeptdesc.
+*        ENDIF.
+*      ENDIF.
+**Get total cost and retail
+*      SUM.
+*      wa_invsum-code   = wa_tmp_inv-code.
+*      wa_invsum-retail = wa_tmp_inv-retail.
+*      wa_invsum-cost   = wa_tmp_inv-cost.
+*      wa_invsum-oi = wa_tmp_inv-oi.
+*      wa_invsum-netcost = wa_invsum-cost + wa_invsum-oi.
+**Get GP%
+*      IF NOT wa_invsum-retail IS INITIAL.
+*        wa_invsum-gp     = ( ( wa_invsum-retail - wa_invsum-netcost ) / wa_invsum-retail ) * c_100.
+*      ENDIF.
+*      APPEND wa_invsum TO it_invsum.
+*      CLEAR wa_invsum.
+*    ENDAT.
+*    CLEAR wa_tmp_inv.
+*  ENDLOOP.
+*ENDIF.
+** Get allowances value for zcoi
+*LOOP AT it_final INTO wa_final
+*WHERE kschl = 'ZFAL' OR kschl = 'ZCAS'. "Defect 3000 include ZCAS "'ZCOI'.
+*  v_allowance = v_allowance + wa_final-ecost.
+*ENDLOOP.
+*MOVE v_allowance TO v_allowance1.
+*SEARCH v_allowance1 FOR '-'.
+*IF sy-subrc = 0 AND sy-fdpos <> 0.
+*  SPLIT v_allowance1 AT '-' INTO v_allowance1 v_text1.
+*  CONDENSE v_allowance1.
+*  CONCATENATE '-' v_allowance1 INTO v_allowance1.
+*ELSE.
+*  CONDENSE v_allowance1.
+*ENDIF.
+** don't print cigarette retail as default
+*DATA: part1(18) TYPE c,
+*      part2(4)  TYPE c,
+*      strlen    TYPE c.
+*IF wa_cust_flags-cigretail_print = c_n OR
+*wa_cust_flags-cigretail_print = space.
+*  LOOP AT it_invsum INTO wa_invsum.
+**    IF WA_INVSUM-CODE = '02'.
+*    IF wa_invsum-spart = c_01.
+** handle the retail
+*      part1 =  wa_invsum-retail.
+*      CONDENSE part1.
+*      TRANSLATE part1 USING
+*      '102030405060708090'.
+*      SPLIT part1 AT '.' INTO part1 part2.
+*      CLEAR part1.
+*      CONCATENATE '0.' part2 INTO part1.
+*      wa_invsum-retail = part1.
+*      CLEAR: part1,part2.
+** handle the gp%
+*      part1 = '0.00'.
+*      wa_invsum-gp = part1.
+*      MODIFY it_invsum FROM wa_invsum TRANSPORTING
+*      retail gp.
+*    ELSE.
+*    ENDIF.
+*  ENDLOOP.
+*ENDIF.

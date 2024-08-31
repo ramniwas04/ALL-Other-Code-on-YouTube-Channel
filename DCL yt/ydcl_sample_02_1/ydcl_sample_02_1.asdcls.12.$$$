@@ -1,0 +1,35 @@
+@EndUserText.label: 'YDCL_sample_02_1'
+@MappingRole: true
+define role YDCL_SAMPLE_02_1 {
+grant
+select
+   on
+    YDDLS_SAMPLE_02
+    redefinition
+   WHERE
+      ( SALES_ORG,VBTYP) = ASPECT PFCG_AUTH( YTWOFIELD,YSALES_ORG,VBTYP,ACTVT='03')
+      ;                
+}
+
+//   OR ( SALES_ORG  )                               = ASPECT PFCG_AUTH( YTWOFIELD,YSALES_ORG,VBTYP='C',ACTVT='03')
+//   OR ( )                                          = ASPECT PFCG_AUTH( YTWOFIELD,YSALES_ORG='1070',VBTYP='C',ACTVT='03')
+//   OR NOT ( )                                      = ASPECT PFCG_AUTH( YTWOFIELD,YSALES_ORG='1710',VBTYP='C',ACTVT='03')
+//   OR ( SALES_ORG BYPASS WHEN IS INITIAL OR NULL ) = ASPECT PFCG_AUTH( YTWOFIELD,YSALES_ORG,VBTYP='C',ACTVT='03')
+//Create authorization object with multiple fields multiplw values
+//( sales_org  ) = aspect pfcg_auth( YTWOFIELD,YSALES_ORG,VBTYP='C',ACTVT='03' ); 
+//( sales_org,VBTYP ) = aspect pfcg_auth( YTWOFIELD,YSALES_ORG,ACTVT='03' ); 
+// ( ) = aspect pfcg_auth( YTWOFIELD,YSALES_ORG='1070',VBTYP='C',ACTVT='03' ); 
+//or sales_org ?= 'NA01'  = vs ?=;  
+//not ( ) =  aspect pfcg_auth( YTWOFIELD,YSALES_ORG='1710',VBTYP='C',ACTVT='03' )
+//The operator NOT can only be specified in front of PFCG conditions with empty parentheses 
+//Conversion of SQl statement with additional condition
+//◾It is advisable to specify an element of the CDS entity directly and to only use path expressions in exceptional cases.
+//◾The operator ?= is applied to all CDS elements in the left parentheses. It cannot be restricted to individual elements. 
+//With BYPASS WHEN, a better alternative exists.
+//( sales_org bypass when is initial ) = aspect pfcg_auth( YTWOFIELD,YSALES_ORG,VBTYP='C',ACTVT='03' )
+//Value of  sales_org Filtering Result 
+//1710( value in auth object) OK 
+//NULL or Initial OK (by bypass value for field) 
+//other sales org value Blocked 
+
+//The addition can be used to let incomplete documents pass a PFCG condition without adding empty values to the PFCG role. 

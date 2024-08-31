@@ -1,0 +1,271 @@
+*&---------------------------------------------------------------------*
+*& Report z_amdp_cunsumtion
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT z_amdp_cunsumtion.
+
+DATA: lv_vbaln TYPE vbak-vbeln,
+      lv_posnr TYPE vbap-posnr,
+      lv_kunnr TYPE vbak-kunnr,
+      lv_matnr TYPE vbap-matnr.
+
+SELECTION-SCREEN BEGIN OF BLOCK b1 WITH FRAME TITLE TEXT-001.
+  SELECT-OPTIONS: s_vbeln FOR lv_vbaln,
+                  s_posnr FOR lv_posnr,
+                  s_kunnr FOR lv_kunnr,
+                  s_matnr FOR lv_matnr.
+SELECTION-SCREEN END OF BLOCK b1.
+
+START-OF-SELECTION.
+
+  cl_shdb_seltab=>combine_seltabs(
+    EXPORTING
+      it_named_seltabs = VALUE #(
+                          ( name = 'VBELN' dref = REF #( s_vbeln[] ) )
+                          ( name = 'POSNR' dref = REF #( s_posnr[] ) )
+                          ( name = 'KUNNR' dref = REF #( s_kunnr[] ) )
+                          ( name = 'MATNR' dref = REF #( s_matnr[] ) )
+                       )
+     iv_client_field  =  'MANDT'
+    RECEIVING
+      rv_where         =  DATA(lv_where)
+  ).
+* CATCH cx_shdb_exception.
+
+  zcl_amdp_select_option=>handle_select_option(
+    EXPORTING
+      iv_mandt = sy-mandt
+      iv_where = lv_where
+    IMPORTING
+      et_out   =  DATA(it_out)
+  ).
+  cl_demo_output=>display( it_out ).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*cl_shdb_seltab=>combine_seltabs
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*  SELECT  a~vbeln AS vbeln,
+*          b~posnr AS posnr,
+*          b~matnr AS matnr,
+*          d~maktx AS maktx,
+*          a~kunnr AS kunnr,
+*          c~name1 AS name1
+*     FROM vbak AS a
+*     INNER JOIN vbap AS b
+*       ON a~vbeln = b~vbeln
+*     LEFT OUTER JOIN kna1 AS c
+*       ON a~kunnr = c~kunnr
+*     LEFT OUTER JOIN makt AS d
+*       ON  b~matnr = d~matnr
+*       AND d~spras  = 'E'
+*    WHERE a~vbeln IN @s_vbeln
+*    AND b~posnr IN @s_posnr
+*    AND a~kunnr IN @s_kunnr
+*    AND b~matnr IN @s_matnr
+*    INTO @DATA(it_out).
+*    IF sy-subrc IS INITIAL.
+*
+*    ENDIF.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*DATA: lv_vbaln TYPE vbeln.
+*SELECTION-SCREEN BEGIN OF BLOCK b1 WITH FRAME TITLE TEXT-001.
+*  SELECT-OPTIONS s_vbeln FOR lv_vbaln.
+*SELECTION-SCREEN END OF BLOCK b1.
+*
+*
+*zcl_amdp_cunsumption=>update_user(
+*  EXPORTING
+*    iv_mandt       = sy-mandt
+*    it_range_vbeln = s_vbeln[]
+*  IMPORTING
+*    et_before      = data(it_before)
+*    et_after       = data(it_after)
+*).
+*
+*cl_demo_output=>write( it_before ).
+*cl_demo_output=>display( it_after ).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*zcl_amdp_client=>get_data_cds(
+*  EXPORTING
+*    iv_clnt = '800'
+*  IMPORTING
+*    et_so   = DATA(it_so)
+*).
+*cl_demo_output=>display( it_so ).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*DATA: ls_session_variable TYPE zcl_amdp_class=>session_variables.
+*
+*zcl_amdp_class=>get_session_variables_amdp(
+* EXPORTING
+*  iv_clnt = '800'
+*  IMPORTING
+*    clnt     = ls_session_variable-client
+*    cds_clnt = ls_session_variable-cds_client
+*    unam     = ls_session_variable-uname
+*    lang     = ls_session_variable-langu
+*    date     = ls_session_variable-datum
+*).
+**CATCH cx_amdp_error.
+*
+*cl_demo_output=>display( ls_session_variable ).
+
+
+*DATA(lr_cust) = NEW zcl_amdp_class(  ).
+*
+*
+*lr_cust->get_cust_detail(
+*  EXPORTING
+*    et_num    = 10
+*    mandt     = sy-mandt
+*  IMPORTING
+*    top_cust  = DATA(it_top)
+*    flop_cust = DATA(it_flop)
+*).
+*
+*cl_demo_output=>write( it_top ).
+*cl_demo_output=>display( it_flop ).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*lr_cust->get_cust_detail(
+*  EXPORTING
+*    et_num    = 10
+*    mandt     = sy-mandt
+*  IMPORTING
+*    top_cust  =  data(it_top)
+*    flop_cust =  data(it_flop)
+*).
+*
+*
+*cl_demo_output=>write( it_top ).
+*cl_demo_output=>display( it_flop ).

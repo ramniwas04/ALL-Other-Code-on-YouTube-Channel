@@ -1,0 +1,42 @@
+*&---------------------------------------------------------------------*
+*& Report y_cds_cunsumption
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT z_cds_cunsumption_1.
+
+
+
+SELECT
+ FROM zddls_sample_04
+ FIELDS SUM( netwr )
+ INTO TABLE @DATA(lt_result).
+IF sy-subrc IS INITIAL.
+  cl_demo_output=>write( lt_result ).
+ENDIF.
+
+SELECT
+ FROM zddls_sample_04
+ FIELDS so,kunnr,netwr,
+        \_item[ (*) INNER WHERE vbeln = ' ' ]-posnr
+ INTO TABLE @DATA(lt_result1).
+IF sy-subrc IS INITIAL.
+
+  DATA(lv_result) = REDUCE netwr( INIT lv_sum TYPE netwr
+                 FOR ls_result IN lt_result1
+                 NEXT lv_sum = lv_sum + ls_result-netwr ).
+
+
+  cl_demo_output=>display( lv_result ).
+ENDIF.
+
+*
+*ABAP SQL - Path Expressions, attributes
+*Additions:
+* 1. ... (n|*)
+* 2. ... INNER|{LEFT|RIGHT OUTER}
+*
+* 3. ... [WHERE] sql_cond  -->using WITH DEFAULT FILTER 
+
+
+*/

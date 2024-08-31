@@ -1,0 +1,18 @@
+*&---------------------------------------------------------------------*
+*& Report zr_opensql_03_generic_exist_t
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zr_opensql_03_generic_exist_t.
+
+
+"generic check if a sales order exists
+SELECT SINGLE 'X'  as l_available
+  FROM vbak
+  INTO @data(lv_exists).
+
+IF lv_exists = abap_true.
+  "do some awesome application logic
+ELSE.
+  "no sales order exists
+ENDIF.

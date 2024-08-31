@@ -1,0 +1,38 @@
+CLASS zcl_amdp_badi_fallback DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+
+    INTERFACES if_badi_interface .
+    INTERFACES zif_amdp_badi_interface .
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+ENDCLASS.
+
+
+
+
+CLASS zcl_amdp_badi_fallback IMPLEMENTATION.
+  METHOD zif_amdp_badi_interface~classify BY DATABASE PROCEDURE
+                 FOR HDB
+                 LANGUAGE SQLSCRIPT
+                 OPTIONS READ-ONLY
+                 USING snwd_bpa.
+    et_classification = select bp_id,
+                           company_name,
+                           legal_form,
+                           CASE company_name
+                             WHEN 'Becker Berlin' then '2'
+                             WHEN 'TECUM' then '2'
+                             WHEN 'SAP' then '1'
+                            ELSE '3' END as "CATEGORY"
+                           from  snwd_bpa
+                           WHERE client = :iv_client
+                            ORDER BY bp_id,company_name;
+
+
+  ENDMETHOD.
+
+ENDCLASS.

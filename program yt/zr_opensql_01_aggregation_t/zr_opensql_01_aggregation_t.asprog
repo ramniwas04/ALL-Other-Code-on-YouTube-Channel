@@ -1,0 +1,109 @@
+*&---------------------------------------------------------------------*
+*& Report zr_opensql_01_aggregation_t
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zr_opensql_01_aggregation_t.
+*Use case only n select list
+*Use case in select list and grp by
+SELECT
+ FROM vbak AS so
+ INNER JOIN vbap AS item
+ ON so~vbeln = item~vbeln
+ INNER JOIN kna1 AS cust
+ ON so~kunnr = cust~kunnr
+ FIELDS so~kunnr AS cust_id,
+        cust~name1 AS customer,
+        item~waerk AS curre,
+        ( item~netpr + 1 )  AS two,
+        SUM( item~netpr ) AS tot_netprice,
+        AVG( item~netpr ) AS net,
+        MAX( item~netpr ) AS max,
+        MIN( item~netpr  ) AS min,
+        COUNT( item~netpr ) AS count
+ GROUP BY so~kunnr,cust~name1,item~waerk,( item~netpr + 1 )
+ INTO TABLE @DATA(it_result).
+IF sy-subrc IS INITIAL.
+  cl_demo_output=>display( it_result ).
+
+ENDIF.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*->The order of the SQL expressions / fields within
+*the comma-separated list is not important
+
+
+*->Columns not specified after GROUP BY
+*can only be specified after SELECT as the argument of
+*an aggregate function of an aggregate expression
+
+*->◾If GROUP BY is used, the statement SELECT bypasses table buffering.
+
+*->◾Using GROUP BY and aggregate functions ensures that
+*aggregates and groups are assembled by the database system,
+* not AS ABAP.
+*This can considerably reduce the volume of data that has to be transported
+*from the database to AS ABAP.
+**********************************************************************
+
+
+
+
+
+
+
+
+*SELECT
+* FROM vbak AS so
+* INNER JOIN vbap AS item
+* ON so~vbeln = item~vbeln
+* INNER JOIN kna1 AS cust
+* ON so~kunnr = cust~kunnr
+* FIELDS so~kunnr && ' ' && cust~name1 AS cust_id,
+*        item~waerk AS curre,
+**        ( item~netpr + 1 )  AS two,
+*        SUM( item~netpr ) AS tot_netprice,
+**        AVG( item~netpr ) AS net,
+**        MAX( item~netpr ) AS max,
+**        MIN( item~netpr  ) AS min,
+*        COUNT( item~netpr ) AS count,
+*        CASE
+*         WHEN item~netpr  > 1000 THEN 'Higher amount document'
+*         WHEN ( item~netpr  > 500 AND item~netpr  < 1000 ) THEN 'Medium amount'
+*         ELSE  'Lower amount'
+*         END AS amount_category
+* GROUP BY so~kunnr,cust~name1,item~waerk,
+**         ( item~netpr + 1 ),
+**           CASE
+**         WHEN item~netpr  > 1000 THEN 'Higher amount document'
+**         WHEN ( item~netpr  > 500 AND item~netpr  < 1000 ) THEN 'Medium amount'
+**         ELSE  'Lower amount'
+**         END,
+*         item~netpr
+**HAVING item~netpr > 1000
+*
+* INTO TABLE @DATA(it_result)
+*
+*.
+*IF sy-subrc IS INITIAL.
+*  cl_demo_output=>display( it_result ).
+*
+*ENDIF.

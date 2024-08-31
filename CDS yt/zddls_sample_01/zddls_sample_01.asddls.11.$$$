@@ -1,0 +1,67 @@
+
+@AbapCatalog.sqlViewName: 'ZVSQL_SAMPLE_01'
+@EndUserText.label: 'This is my fist DDIC based CDS'
+@AbapCatalog.preserveKey: true
+@AbapCatalog: {
+    buffering: {
+        status:#SWITCHED_OFF,
+        type: #NONE,
+        numberOfKeyFields: 000
+    },
+
+    viewEnhancementCategory: [#PROJECTION_LIST,#UNION],
+    compiler: {
+        compareFilter: true
+    },
+    dataMaintenance: #RESTRICTED
+}
+@AccessControl.authorizationCheck: #NOT_REQUIRED
+@ClientHandling: {
+    type: #INHERITED,
+    algorithm:#SESSION_VARIABLE 
+}
+
+
+/*define view zcds_sample_01
+     as select
+        key  vbeln as so,
+             kunnr as cust
+       from vbak; */
+// Commentsingle
+-- vndvld
+define view zcds_sample_01 
+  as select from vbak
+{
+
+  key    kunnr as cust,
+         vbeln as so,
+         $session.client as syst_client,
+         $session.system_date as syst_date,
+         $session.system_language as syst_lang
+};
+
+
+
+
+/* 
+DataAging Annotations 
+ObjectModel.usageType
+//@Metadata.ignorePropagatedAnnotations: true
+//@ObjectModel.usageType:{
+//    serviceQuality: #X,
+//    sizeCategory: #S,
+//    dataClass: #MIXED
+//}
+This information is especially important in regards of performance 
+that can be expected by the consumer of the view. 
+
+
+Create a view use in select report to display results.
+
+
+
+*/
+
+
+
+

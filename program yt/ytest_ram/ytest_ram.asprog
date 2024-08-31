@@ -1,0 +1,18 @@
+*&---------------------------------------------------------------------*
+*& Report ytest_ram
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ytest_ram.
+
+
+DATA: lv_kbetr TYPE kbetr VALUE '99.99'.
+DATA: lv_100 TYPE kbetr VALUE '100.00'.
+*DATA: lv_100 TYPE f  VALUE '100.00'.
+*DATA: lv_kbetr TYPE f VALUE '99.50'.
+DATA:lv_zstx TYPE p DECIMALS 4.
+*DATA:lv_zstx TYPE f.
+lv_zstx = lv_kbetr / 100.
+
+
+cl_demo_output=>display( lv_zstx ).

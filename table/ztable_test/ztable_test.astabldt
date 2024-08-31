@@ -1,0 +1,9 @@
+@EndUserText.label : 'asdsdf'
+@AbapCatalog.enhancementCategory : #NOT_EXTENSIBLE
+@AbapCatalog.tableCategory : #TRANSPARENT
+@AbapCatalog.deliveryClass : #A
+@AbapCatalog.dataMaintenance : #RESTRICTED
+define table ztable_test {
+  key client : abap.clnt not null;
+
+}

@@ -1,0 +1,151 @@
+*&---------------------------------------------------------------------*
+*& Report z_tab_expre_performance
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT z_tab_expre_performance.
+
+*-----------------------------------------------------------------------*
+CLASS lcl_demo DEFINITION .
+*-----------------------------------------------------------------------*
+  PUBLIC SECTION.
+    CLASS-METHODS main.
+
+  PRIVATE SECTION.
+    TYPES: BEGIN OF ty_struct,
+             id  TYPE i,
+             val TYPE i,
+           END OF ty_struct.
+    TYPES ty_itab TYPE SORTED TABLE OF ty_struct WITH UNIQUE KEY id.
+    DATA it_rand_no TYPE ty_itab.
+
+    TYPES:BEGIN OF ty_final,
+            text TYPE string,
+            time TYPE i,
+          END OF ty_final.
+    DATA:  it_final TYPE TABLE OF ty_final.
+
+    DATA repeat TYPE i.
+    DATA my_default TYPE ty_struct.
+
+
+    METHODS fill_rand_no_tab IMPORTING iv_size   TYPE i DEFAULT 1000
+                                       iv_repeat TYPE i DEFAULT 1.
+    METHODS execute IMPORTING iv_find_id TYPE i
+                              iv_user    TYPE syuname.
+ENDCLASS.
+
+*-----------------------------------------------------------------------*
+CLASS lcl_demo IMPLEMENTATION.
+*-----------------------------------------------------------------------*
+  METHOD main.
+
+    DATA(lr_new) = NEW lcl_demo( ).
+    lr_new->fill_rand_no_tab(  ).
+
+*    lr_new->execute( iv_find_id = 0
+*                     iv_user = 'XXXS' ).
+
+    lr_new->execute( iv_find_id = 50
+                     iv_user = sy-uname ).
+
+  ENDMETHOD.
+*-----------------------------------------------------------------------*
+  METHOD fill_rand_no_tab.
+    DATA lr_rnd_no TYPE REF TO if_random_number.
+    lr_rnd_no ?= NEW cl_random_number( ).
+    lr_rnd_no->init( i_seed = 78348 ).
+    me->repeat = iv_repeat.
+    DO iv_size TIMES.
+      INSERT VALUE #( id = sy-index val = lr_rnd_no->get_random_int( 9999 ) ) INTO TABLE it_rand_no.
+    ENDDO.
+*    cl_demo_output=>write( it_rand_no  ).
+    my_default = VALUE #( id = 55 val = 9999 ).
+  ENDMETHOD.
+*-----------------------------------------------------------------------*
+  DEFINE _start_timer.
+    GET RUN TIME FIELD lv_start.
+    DO repeat TIMES.
+  END-OF-DEFINITION.
+*-----------------------------------------------------------------------*
+  DEFINE _stop_timer.
+    ENDDO.
+    GET RUN TIME FIELD lv_stop.
+        it_final = VALUE #( BASE it_final ( text = &1 && ':'  time = lv_stop - lv_start )  ).
+  END-OF-DEFINITION.
+*-----------------------------------------------------------------------*
+  METHOD execute.
+    DATA lv_start TYPE i.
+    DATA lv_stop TYPE i.
+    DATA ls_rand_no TYPE ty_struct.
+
+**********************************************************************
+    _start_timer.
+    IF line_exists( it_rand_no[ id = iv_find_id ] ).
+    ENDIF.
+    _stop_timer `line_exists( )                         `.
+**********************************************************************
+    _start_timer.
+    READ TABLE it_rand_no WITH KEY id = iv_find_id TRANSPORTING NO FIELDS.
+    IF sy-subrc <> 0.
+      "Empty IF-block, just to provide equivalence to catch block
+    ENDIF.
+    _stop_timer `READ TABLE ... TRANSPORTING NO FIELDS  `.
+**********************************************************************
+    _start_timer.
+    READ TABLE it_rand_no INTO ls_rand_no WITH KEY id = iv_find_id.
+    IF sy-subrc <> 0.
+    ENDIF.
+    _stop_timer `READ TABLE                             `.
+**********************************************************************
+    _start_timer.
+    TRY.
+        ls_rand_no = it_rand_no[ id = iv_find_id ].
+      CATCH cx_sy_itab_line_not_found ##NO_HANDLER.
+    ENDTRY.
+    _stop_timer `TRY ... itab[ ... ] CATCH              `.
+**********************************************************************
+    _start_timer.
+    ASSIGN it_rand_no[ id = iv_find_id ] TO FIELD-SYMBOL(<row>).
+    IF sy-subrc <> 0.
+    ENDIF.
+    _stop_timer `ASSIGN itab[ ... ]                     `.
+**********************************************************************
+    _start_timer.
+    ls_rand_no = VALUE #( it_rand_no[ id = iv_find_id ] OPTIONAL ).
+    IF ls_rand_no IS INITIAL.
+    ENDIF.
+    _stop_timer `VALUE #( itabl[ ... ] OPTIONAL )       `.
+**********************************************************************
+    _start_timer.
+    ls_rand_no = VALUE #( it_rand_no[ id = iv_find_id ] OPTIONAL ).
+    _stop_timer `VALUE #( itabl[ ... ] OPTIONAL ) w/o IF`.
+**********************************************************************
+    _start_timer.
+    ls_rand_no = VALUE #( it_rand_no[ id = iv_find_id ] DEFAULT my_default ).
+    _stop_timer `VALUE #( itabl[ ... ] DEFAULT w/o IF ) `.
+**********************************************************************
+    _start_timer.
+    DATA(row_ref) = REF #( it_rand_no[ id = iv_find_id ] OPTIONAL ) .
+    IF sy-subrc <> 0.
+    ENDIF.
+    _stop_timer `REF #( itab[ ... ] OPTIONAL )          `.
+**********************************************************************
+    _start_timer.
+    DATA(idx) = line_index( it_rand_no[ id = iv_find_id ] ).
+    IF idx GT 0.
+      ls_rand_no = it_rand_no[ idx ].
+    ENDIF.
+    _stop_timer `line_index( )                          `.
+**********************************************************************
+    SORT it_final BY time.
+    cl_demo_output=>display( it_final ).
+  ENDMETHOD.
+*-----------------------------------------------------------------------*
+ENDCLASS.
+
+
+*-----------------------------------------------------------------------*
+START-OF-SELECTION.
+*-----------------------------------------------------------------------*
+  lcl_demo=>main( ).

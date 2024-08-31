@@ -1,0 +1,241 @@
+CLASS ycl_amdp_introduction DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+    INTERFACES if_amdp_marker_hdb.
+    TYPES:
+      BEGIN OF ty_bupa_selection,
+        cust_name  TYPE kna1-name1,
+        net_amount TYPE vbak-netwr,
+      END OF ty_bupa_selection.
+
+    TYPES:
+      tt_bupa_selection TYPE STANDARD TABLE OF ty_bupa_selection WITH EMPTY KEY.
+**********************************************************************
+    TYPES:
+      BEGIN OF session_variables,
+        client     TYPE sy-mandt,
+        cds_client TYPE sy-mandt,
+        uname      TYPE sy-uname,
+        langu      TYPE sy-langu,
+        datum      TYPE sy-datum,
+      END OF session_variables .
+
+    CLASS-METHODS get_session_variables_amdp
+*      AMDP OPTIONS CDS SESSION CLIENT mandt
+      IMPORTING VALUE(mandt)    TYPE sy-mandt
+      EXPORTING
+                VALUE(clnt)     TYPE session_variables-client
+                VALUE(cds_clnt) TYPE session_variables-cds_client
+                VALUE(unam)     TYPE session_variables-uname
+                VALUE(lang)     TYPE session_variables-langu
+                VALUE(date)     TYPE session_variables-datum
+      RAISING
+                cx_amdp_error .
+**********************************************************************
+    CLASS-METHODS get_top_and_flop
+      IMPORTING
+        VALUE(iv_client) TYPE mandt
+        VALUE(iv_number) TYPE i
+      EXPORTING
+        VALUE(et_top)    TYPE tt_bupa_selection
+        VALUE(et_flop)   TYPE tt_bupa_selection.
+***************************************************************
+    TYPES: tt_zcds_sample_01 TYPE TABLE OF zddls_sample_02,
+           tt_vbeln          TYPE TABLE OF range_vbeln.
+    CLASS-METHODS get_data_ddic_cds
+      AMDP OPTIONS
+      CDS SESSION CLIENT iv_mandt
+      IMPORTING VALUE(iv_mandt) TYPE sy-mandt
+                VALUE(it_vbeln) TYPE tt_vbeln
+      EXPORTING VALUE(et_vbak)  TYPE  tt_zcds_sample_01.
+**********************************************************************
+    CLASS-METHODS update_so_header
+      IMPORTING VALUE(iv_mandt) TYPE sy-mandt
+      CHANGING  VALUE(it_vbeln) TYPE tt_vbeln .
+**********************************************************************
+    TYPES:BEGIN OF ty_out,
+*            mandt TYPE mandt,
+            vbeln TYPE vbeln,
+            posnr TYPE posnr,
+            matnr TYPE matnr,
+            maktx TYPE maktx,
+            kunnr TYPE kunnr,
+            name1 TYPE name1,
+
+          END OF ty_out,
+          tt_out TYPE TABLE OF ty_out WITH DEFAULT KEY.
+
+    CLASS-METHODS handle_select_option
+      IMPORTING
+        VALUE(iv_where) TYPE string
+      RETURNING
+        VALUE(it_out)   TYPE tt_out.
+
+
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+    METHODS update_so_header_p
+      IMPORTING VALUE(iv_mandt) TYPE sy-mandt
+      CHANGING  VALUE(it_vbeln) TYPE tt_vbeln .
+
+ENDCLASS.
+
+
+
+CLASS ycl_amdp_introduction IMPLEMENTATION.
+  METHOD handle_select_option BY DATABASE FUNCTION
+                              FOR HDB
+                              LANGUAGE SQLSCRIPT
+                              OPTIONS READ-ONLY
+                              USING vbak vbap kna1 makt
+                              .
+
+*    it_vbak = apply_filter ( vbak, :iv_where );
+***********************************************************
+*Case2
+     it_out = SELECT --a.mandt as mandt,
+                     a.vbeln as vbeln,
+                     b.posnr as posnr,
+                     b.matnr as matnr,
+                     d.maktx as maktx,
+                     a.kunnr as kunnr,
+                     c.name1 as name1
+                from vbak as a
+                inner join vbap as b
+                  on a.mandt = b.mandt
+                 and a.vbeln = b.vbeln
+                left outer join kna1 as c
+                on a.mandt = c.mandt
+                and a.kunnr = c.kunnr
+                left outer join makt as d
+                on b.mandt = d.mandt
+               and  b.matnr = d.matnr
+               and d.spras  = 'E'
+               ;
+
+     it_out = apply_filter ( :it_out, :iv_where );
+       RETURN :it_out;
+  ENDMETHOD.
+  METHOD update_so_header BY DATABASE PROCEDURE
+                              FOR HDB
+                              LANGUAGE SQLSCRIPT
+                              USING ycl_amdp_introduction=>update_so_header_p.
+    call "YCL_AMDP_INTRODUCTION=>UPDATE_SO_HEADER_P"(
+             iv_mandt => :iv_mandt,
+             IT_VBELN__IN__ => :it_vbeln,
+             it_vbeln => :it_vbeln
+         );
+  ENDMETHOD.
+
+  METHOD update_so_header_p BY DATABASE PROCEDURE
+                           FOR HDB
+                           LANGUAGE SQLSCRIPT
+                           USING vbak.
+    update vbak set zzusername = 'SAPHANA'
+                where mandt = :iv_mandt
+                and   vbeln in ( select low from :it_vbeln  );
+
+  ENDMETHOD.
+
+  METHOD get_data_ddic_cds BY DATABASE PROCEDURE
+                              FOR HDB
+                              LANGUAGE SQLSCRIPT
+                              USING zddls_sample_02
+                              .
+    et_vbak = SELECT so,sales__org,vkgrp,num_lit,char_lit,syst_date
+*    so,cust,waerk,netwr,syst_client,syst_date,syst_lang
+               FROM ZDDLS_SAMPLE_02( session_context('SAP_SYSTEM_DATE') )
+                 WHERE mandt = :iv_mandt
+                 and  so in ( select low from :it_vbeln ) ;
+
+  ENDMETHOD.
+  METHOD get_top_and_flop BY DATABASE PROCEDURE
+                           FOR HDB
+                           LANGUAGE SQLSCRIPT
+                           OPTIONS READ-ONLY
+                           USING vbak kna1
+                           .
+
+    et_top =   select top :iv_number cust.name1 as cust_name,
+                 sum(so_head.netwr) as net_amount
+                  FROM vbak as so_head
+                       inner JOIN kna1 as cust
+                       on so_head.kunnr = cust.kunnr
+                        group by name1
+                        ORDER BY net_amount desc;
+
+    et_flop =   select top :iv_number cust.name1 as cust_name,
+                 sum(so_head.netwr) as net_amount
+                  FROM vbak as so_head
+                       inner JOIN kna1 as cust
+                       on so_head.kunnr = cust.kunnr
+                        group by name1
+                        ORDER BY net_amount asc;
+  ENDMETHOD.
+
+  METHOD get_session_variables_amdp
+        BY DATABASE PROCEDURE FOR HDB
+         LANGUAGE SQLSCRIPT.
+    clnt := session_context('CLIENT');
+    cds_clnt := session_context('CDS_CLIENT');
+    unam := session_context('APPLICATIONUSER');
+    lang := session_context('LOCALE_SAP');
+    date := session_context('SAP_SYSTEM_DATE');
+
+  ENDMETHOD.
+
+
+
+
+
+ENDCLASS.
+
+*An AMDP Method => database procedure.
+*It can be static or instance method
+*It can be declare in any visibility section
+*In declaration part we can’t say it is AMDP method or not
+*return values cannot be declared using RETURNING.
+*◾The parameters must be declared using VALUE for pass by value
+*The database objects of the current database schema accessed in the AMDP method must be declared using an addition USING.
+*the AMDP framework does not support automatic client handling
+
+*The following restrictions apply to method implementation:
+*AMDP Method for ◾AMDP procedure implementations
+*methods without a return value
+*•AMDP procedure implementations with the addition BY DATABASE PROCEDURE
+*◾An AMDP method must not be empty.
+*◾Writes cannot be performed on database tables where table buffering is switched on, since SQLScript accesses are ignored by buffer synchronizations.
+*◾AMDP methods do not have any implicit enhancement options
+*◾DDL statements are not allowed for creating, changing or deleting database objects
+*◾no database commits and  database rollbacks using COMMIT and ROLLBACK statements are allowed
+
+
+*Parameter interface of an AMDP procedure implementation:
+*◾The typing of the parameters must not be generic.
+*    >>Only elementary data types and table types with a structured row type can be used.
+*    >>The row type of a tabular type can only contain elementary data types as components
+
+*◾Only input parameters can be flagged as optional parameters.
+*  >>Each elementary optional input parameter must have a replacement parameter declared using DEFAULT.
+*  >>An optional tabular input parameter cannot have any replacement parameters and must be made optional instead using OPTIONAL.
+
+
+* It will create SQLScript procedure YCL_AMDP_INTRODUCTION=>GET_VBAK
+* in the ABAP DB schema
+*How to access another AMDP procedure
+*CALL "CLASS=>METH"( f1 => a1, f2 => a2, ... );
+*The parameter interface of an SQLScript procedure supports input
+*IN, OUT, INOUT(It can be only scalar)
+*AMDP -> SQL script Conversion parameter interface
+* IMPORTING => IN
+* EXPORTING => OUT
+* CHANGING (SCALAR)  => INOUT
+* CHANGING (Tabular)  => IN and OUT two parameter
+*   Since SQL script not support INOUT tabular parameter
+*  NAme  OUT = Changing parameter name
+*        IN   = Changing_parameter_IN_
+
+
